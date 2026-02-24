@@ -25,6 +25,9 @@
             color: #777;
             font-size: 0.9em;
         }
+        .inline-btn {
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -39,7 +42,7 @@
         <div class="result" id="numResult">—</div>
     </div>
 
-    <!-- 功能2：15人身份分配（编号1～15，固定配置） -->
+    <!-- 功能2：15人身份分配 -->
     <div class="section">
         <h3>2. 15人身份分配</h3>
         <p><strong>配置：</strong> 4普通村民 · 4吸血鬼 · 长老 · 预言家 · 女巫 · 守护者 · 猎人 · 丘比特 · 吹笛人</p>
@@ -49,7 +52,28 @@
         </div>
     </div>
 
-    <!-- 底部提供者信息 -->
+    <!-- 功能3：今日人品 -->
+    <div class="section">
+        <h3>3. 今日人品</h3>
+        <label>输入名字: <input type="text" id="fortuneName" placeholder="例如：喵喵"></label>
+        <button id="fortuneBtn">🔮 看看今日运气</button>
+        <div class="result" id="fortuneResult">—</div>
+    </div>
+
+    <!-- 功能4：要不要相信果冻 -->
+    <div class="section">
+        <h3>4. 要不要相信果冻</h3>
+        <button id="jellyBtn">🍮 问果冻</button>
+        <div class="result" id="jellyResult">—</div>
+    </div>
+
+    <!-- 功能5：牢冰会赢吗 -->
+    <div class="section">
+        <h3>5. 牢冰会赢吗</h3>
+        <button id="laobingBtn">❓ 问问看</button>
+        <div class="result" id="laobingResult">—</div>
+    </div>
+
     <footer>
         © 2025 鬼村随机工具 · 由 <span id="provider">顾九曜</span> 提供
     </footer>
@@ -73,18 +97,16 @@
                 numRes.textContent = rand;
             });
 
-            // ---------- 功能2：15人固定身份分配 ----------
+            // ---------- 功能2：15人身份分配 ----------
             const assignBtn = document.getElementById('assignBtn');
             const assignmentDiv = document.getElementById('assignmentResult');
 
-            // 固定身份池（4村民、4吸血鬼、长老、预言家、女巫、守护者、猎人、丘比特、吹笛人）
             const ROLE_POOL = [
                 '普通村民', '普通村民', '普通村民', '普通村民',
                 '吸血鬼', '吸血鬼', '吸血鬼', '吸血鬼',
                 '长老', '预言家', '女巫', '守护者', '猎人', '丘比特', '吹笛人'
             ];
 
-            // 打乱数组
             function shuffleArray(arr) {
                 const a = [...arr];
                 for (let i = a.length - 1; i > 0; i--) {
@@ -105,7 +127,111 @@
             }
 
             assignBtn.addEventListener('click', generateAssignment);
-            generateAssignment(); // 页面加载时自动生成一次
+            generateAssignment();
+
+            // ---------- 功能3：今日人品 ----------
+            const fortuneNameInput = document.getElementById('fortuneName');
+            const fortuneBtn = document.getElementById('fortuneBtn');
+            const fortuneResult = document.getElementById('fortuneResult');
+
+            // 获取今日日期字符串 (YYYY-MM-DD)
+            function getTodayString() {
+                const d = new Date();
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            }
+
+            // 根据分数返回等级描述
+            function getFortuneLevel(score) {
+                if (score >= 1 && score <= 20) return '大凶';
+                if (score <= 40) return '中凶';
+                if (score <= 50) return '小凶';
+                if (score <= 60) return '小吉';
+                if (score <= 80) return '中吉';
+                if (score <= 100) return '大吉';
+                return '未知';
+            }
+
+            fortuneBtn.addEventListener('click', function() {
+                const name = fortuneNameInput.value.trim();
+                if (!name) {
+                    fortuneResult.textContent = '请输入名字';
+                    return;
+                }
+
+                const today = getTodayString();
+                const storageKey = `fortune_${name}`;
+                const stored = localStorage.getItem(storageKey);
+
+                let score;
+                let storedDate;
+
+                if (stored) {
+                    try {
+                        const data = JSON.parse(stored);
+                        if (data.date === today) {
+                            score = data.score;
+                        } else {
+                            // 日期不同，重新生成
+                            score = Math.floor(Math.random() * 100) + 1;
+                            localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
+                        }
+                    } catch (e) {
+                        // 解析失败，重新生成
+                        score = Math.floor(Math.random() * 100) + 1;
+                        localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
+                    }
+                } else {
+                    // 无记录，生成新记录
+                    score = Math.floor(Math.random() * 100) + 1;
+                    localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
+                }
+
+                const level = getFortuneLevel(score);
+                fortuneResult.textContent = `${score} · ${level}`;
+            });
+
+            // ---------- 功能4：要不要相信果冻 ----------
+            const jellyBtn = document.getElementById('jellyBtn');
+            const jellyResult = document.getElementById('jellyResult');
+
+            const jellyBelieve = [
+                '相信果冻，它会带来好运！',
+                '相信果冻，对的对的对的。',
+                '相信果冻，偶尔也有真话。',
+                '相信果冻，给他吃可可果。'
+            ];
+            const jellyNotBelieve = [
+                '不相信果冻，它会带来不幸！',
+                '不相信果冻，不对不对不对。',
+                '不相信果冻，嘴里全是假话。',
+                '不相信果冻，绿色鼻涕走开！'
+            ];
+
+            jellyBtn.addEventListener('click', function() {
+                const r = Math.random();
+                if (r < 0.5) {
+                    // 相信
+                    const msg = jellyBelieve[Math.floor(Math.random() * jellyBelieve.length)];
+                    jellyResult.textContent = '✨ 相信果冻 · ' + msg;
+                } else {
+                    // 不相信
+                    const msg = jellyNotBelieve[Math.floor(Math.random() * jellyNotBelieve.length)];
+                    jellyResult.textContent = '❌ 不相信果冻 · ' + msg;
+                }
+            });
+
+            // ---------- 功能5：牢冰会赢吗 ----------
+            const laobingBtn = document.getElementById('laobingBtn');
+            const laobingResult = document.getElementById('laobingResult');
+
+            laobingBtn.addEventListener('click', function() {
+                const r = Math.random();
+                if (r < 0.5) {
+                    laobingResult.textContent = '🏆 该赢了吧！';
+                } else {
+                    laobingResult.textContent = '💔 接着输...';
+                }
+            });
         })();
     </script>
 </body>
