@@ -1,237 +1,1269 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>鬼村神秘小工具1.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鬼村神秘小工具3.0</title>
     <style>
-        body { font-family: sans-serif; max-width: 900px; margin: 20px auto; padding: 0 10px; }
-        hr { margin: 30px 0; }
-        .section { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; }
-        input, button { font-size: 16px; padding: 6px; margin: 5px 0; }
-        .result { background: #eee; padding: 10px; margin-top: 10px; font-weight: bold; }
-        .assignment-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 5px 15px;
-            margin-top: 10px;
-        }
-        .assignment-item {
-            border-bottom: 1px dotted #aaa;
-            padding: 4px 0;
-        }
-        footer {
-            margin-top: 30px;
-            text-align: center;
-            color: #777;
-            font-size: 0.9em;
-        }
-        .inline-btn {
-            margin-right: 10px;
-        }
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+        html { background: #0b0a18; }
+        body { margin: 0; padding: 0; min-height: 100vh; font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif; color: #e8e6f0; background: radial-gradient(1200px 600px at 50% -10%, #2a1650 0%, #14102a 45%, #0b0a18 100%) fixed; }
+        .content-wrap { max-width: 960px; margin: 0 auto; padding: 20px 12px 60px; position: relative; z-index: 1; }
+        .ghost-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .ghost-bg span { position: absolute; bottom: -15%; font-size: 2.2rem; opacity: 0.25; animation: ghostFloat linear infinite; }
+        .ghost-bg span:nth-child(1) { left: 4%; animation-duration: 26s; animation-delay: 0s; font-size: 2.8rem; }
+        .ghost-bg span:nth-child(2) { left: 20%; animation-duration: 34s; animation-delay: 4s; font-size: 1.8rem; }
+        .ghost-bg span:nth-child(3) { left: 42%; animation-duration: 30s; animation-delay: 2s; font-size: 2.4rem; }
+        .ghost-bg span:nth-child(4) { left: 63%; animation-duration: 38s; animation-delay: 6s; font-size: 2rem; }
+        .ghost-bg span:nth-child(5) { left: 80%; animation-duration: 28s; animation-delay: 1s; font-size: 2.6rem; }
+        .ghost-bg span:nth-child(6) { left: 92%; animation-duration: 32s; animation-delay: 5s; font-size: 1.6rem; }
+        .ghost-bg span:nth-child(7) { left: 12%; animation-duration: 36s; animation-delay: 3s; font-size: 1.7rem; }
+        .ghost-bg span:nth-child(8) { left: 55%; animation-duration: 29s; animation-delay: 7s; font-size: 2.3rem; }
+        .ghost-bg span:nth-child(9) { left: 72%; animation-duration: 33s; animation-delay: 2s; font-size: 1.9rem; }
+        .ghost-bg span:nth-child(10) { left: 35%; animation-duration: 40s; animation-delay: 8s; font-size: 2.1rem; }
+        @keyframes ghostFloat { 0% { transform: translateY(0) translateX(0) rotate(0deg); } 50% { transform: translateY(-60vh) translateX(30px) rotate(12deg); } 100% { transform: translateY(-120vh) translateX(-20px) rotate(-8deg); } }
+        .site-title { text-align: center; font-size: 2.6rem; margin: 8px 0 20px; letter-spacing: 2px; font-family: "KaiTi", "STKaiti", "FangSong", "STFangsong", "Microsoft YaHei", cursive; background: linear-gradient(90deg, #a06bff, #00f0ff, #ff9de2, #a06bff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; text-shadow: 0 0 14px rgba(160,107,255,0.55), 0 0 30px rgba(0,240,255,0.35); animation: titleShift 6s linear infinite; }
+        @keyframes titleShift { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
+        .menu-subtitle { text-align: center; color: #9a93b5; margin: 0 0 20px; }
+        .menu { display: flex; flex-direction: column; gap: 18px; max-width: 460px; margin: 0 auto; }
+        .menu-btn { font-size: 1.35rem; padding: 26px 20px; border-radius: 16px; letter-spacing: 2px; background: linear-gradient(135deg, rgba(160,107,255,0.25), rgba(0,240,255,0.12)); border: 1px solid rgba(160,120,255,0.5); box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
+        .menu-btn:hover { transform: translateY(-2px); border-color: #00f0ff; box-shadow: 0 0 22px rgba(0,240,255,0.35); }
+        .board-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+        .back-btn { margin: 0; flex-shrink: 0; }
+        .reset-host-btn { margin: 0; flex-shrink: 0; background: rgba(255,90,110,0.15); border-color: rgba(255,90,110,0.5); }
+        .board-title { flex: 1; min-width: 200px; font-size: 1.5rem; font-weight: bold; text-align: center; padding: 12px 16px; margin: 0; border-radius: 12px; background: linear-gradient(135deg, rgba(160,107,255,0.22), rgba(0,240,255,0.12)); border: 1px solid rgba(160,120,255,0.4); text-shadow: 0 0 14px rgba(0,240,255,0.55); letter-spacing: 1px; }
+        .section { border: 1px solid rgba(160,120,255,0.28); border-radius: 14px; padding: 18px; margin-bottom: 22px; background: rgba(255,255,255,0.04); box-shadow: 0 4px 20px rgba(0,0,0,0.35); backdrop-filter: blur(6px); transition: box-shadow .25s ease, border-color .25s ease; }
+        .section:hover { border-color: rgba(0,240,255,0.45); box-shadow: 0 6px 28px rgba(0,240,255,0.12), 0 4px 20px rgba(0,0,0,0.4); }
+        .section h3 { margin: 0 0 14px; font-size: 1.3rem; color: #f3efff; text-shadow: 0 0 10px rgba(160,107,255,0.5); }
+        input, textarea, select { font-size: 16px; padding: 8px 10px; margin: 5px 0; background: rgba(0,0,0,0.35); border: 1px solid rgba(160,120,255,0.35); border-radius: 8px; color: #eef; outline: none; font-family: inherit; }
+        input:focus, textarea:focus, select:focus { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0,240,255,0.35); }
+        select option { background: #1c1533; color: #eef; }
+        input[type="number"] { width: 90px; }
+        input[type="text"] { width: 200px; }
+        #playerNames { width: 100%; max-width: 500px; }
+        textarea { width: 100%; resize: vertical; display: block; }
+        button { font-size: 16px; padding: 8px 14px; margin: 5px 0; cursor: pointer; border-radius: 8px; border: 1px solid rgba(160,120,255,0.5); background: linear-gradient(135deg, #4a2b8a, #2a1650); color: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.4); transition: transform .15s, box-shadow .2s, border-color .2s; }
+        button:hover { transform: translateY(-1px); border-color: #00f0ff; box-shadow: 0 0 16px rgba(0,240,255,0.35); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .result { background: rgba(0,240,255,0.08); border: 1px dashed rgba(0,240,255,0.3); padding: 10px 12px; margin-top: 12px; font-weight: bold; border-radius: 8px; color: #d7fbff; }
+        #assignmentResult { font-weight: normal; }
+        .faction-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+        .faction-tab { margin: 0; font-size: 0.95rem; padding: 6px 12px; }
+        .faction-tab.active { border-color: #00f0ff; background: linear-gradient(135deg, #1f5a6b, #1a2a52); box-shadow: 0 0 12px rgba(0,240,255,0.4); }
+        .assignment-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px 15px; margin-top: 10px; }
+        .assignment-item { border-bottom: 1px dotted rgba(170,170,170,0.35); padding: 5px 6px; border-radius: 6px; }
+        .assignment-tip { margin-top: 6px; font-size: 0.85rem; color: #9a93b5; }
+        .assignment-stats { margin-top: 12px; padding: 8px 10px; border-radius: 8px; background: rgba(160,107,255,0.12); border: 1px solid rgba(160,107,255,0.3); color: #e6dcff; }
+        .stat-total { color: #9a93b5; font-weight: normal; font-size: 0.9em; }
+        .game-time-value { font-size: 1.1rem; font-weight: bold; color: #00f0ff; text-shadow: 0 0 10px rgba(0,240,255,0.6); }
+        .game-time-note { font-size: 0.85rem; color: #9a93b5; margin: 6px 0 10px; }
+        .flow-time-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .flow-time-row select { margin: 0; }
+        .log-hint { color: #ffb74d; font-size: 0.9rem; margin: 4px 0 0; min-height: 1.2em; }
+        .log-list { margin-top: 14px; }
+        .log-entry { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; transition: box-shadow .2s, background .2s; }
+        .log-entry:hover { background: rgba(255,255,255,0.18); box-shadow: 0 0 12px rgba(0,240,255,0.25); }
+        .log-time { color: #00f0ff; font-weight: bold; white-space: nowrap; text-shadow: 0 0 8px rgba(0,240,255,0.6); }
+        .log-text { flex: 1; word-break: break-word; white-space: pre-wrap; color: #efeaff; }
+        .log-del { font-size: 0.85rem; padding: 4px 8px; white-space: nowrap; background: rgba(255,60,80,0.15); border-color: rgba(255,90,110,0.5); }
+        .log-del:hover { border-color: #ff5b6e; box-shadow: 0 0 10px rgba(255,90,110,0.4); }
+        .log-empty { color: #8a8a9a; font-style: italic; text-align: center; padding: 18px 0; }
+        #clearLogBtn { margin-top: 12px; background: rgba(255,60,80,0.15); border-color: rgba(255,90,110,0.5); }
+        #clearLogBtn:hover { box-shadow: 0 0 14px rgba(255,90,110,0.35); }
+        .guess-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
+        .guess-list { margin-top: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 12px; }
+        .guess-cell { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid rgba(160,120,255,0.2); border-radius: 10px; background: rgba(0,0,0,0.18); }
+        .guess-no { color: #9a93b5; font-weight: bold; font-size: 0.9rem; }
+        .guess-name { width: 100%; }
+        .guess-cat, .guess-god { width: 100%; }
+        @media (max-width: 640px) { .guess-list { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 420px) { .guess-list { grid-template-columns: 1fr; } }
+        .vote-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
+        .vote-list { margin-top: 10px; }
+        .vote-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-bottom: 1px dotted rgba(170,170,170,0.3); }
+        .vote-row.dead { opacity: 0.5; }
+        .vote-voter { min-width: 120px; flex-shrink: 0; }
+        .vote-arrow { color: #9a93b5; }
+        .vote-target { flex: 1; max-width: 220px; }
+        .vote-tally-title { margin-top: 10px; color: #e6dcff; }
+        .vote-ranking { margin: 6px 0; padding-left: 22px; color: #efeaff; }
+        .vote-verdict { color: #ff9de2; font-weight: bold; margin-top: 6px; }
+        .vote-none { color: #9a93b5; font-style: italic; }
+        .exec-btn { margin-top: 8px; background: rgba(255,90,110,0.2); border-color: rgba(255,90,110,0.6); }
+        .console-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
+        .console-block { margin-bottom: 16px; }
+        .console-block:last-child { margin-bottom: 0; }
+        .console-block-title { font-weight: bold; color: #f3efff; margin-bottom: 8px; }
+        .console-summary { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 12px; border-radius: 10px; background: rgba(160,107,255,0.1); border: 1px solid rgba(160,107,255,0.3); margin-bottom: 10px; }
+        .cs-item { color: #e6dcff; }
+        .flow-list { display: flex; flex-direction: column; gap: 4px; color: #e6dcff; font-size: 0.95rem; }
+        .couple-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+        .couple-heart { color: #ff9de2; }
+        .console-table { border: 1px solid rgba(160,120,255,0.25); border-radius: 10px; overflow: hidden; }
+        .console-row { display: grid; grid-template-columns: 52px 1fr 96px; gap: 8px; padding: 7px 10px; border-bottom: 1px solid rgba(170,170,170,0.2); align-items: center; }
+        .console-row.player { grid-template-columns: 52px 1fr 96px; }
+        .console-row:last-child { border-bottom: none; }
+        .console-row.dead { opacity: 0.5; }
+        .c-no { color: #9a93b5; font-weight: bold; }
+        .c-name { color: #efeaff; word-break: break-word; }
+        .c-tags { color: #ff9de2; text-align: right; }
+        .death-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .death-cell { padding: 8px; border: 1px solid rgba(160,120,255,0.25); border-radius: 8px; text-align: center; }
+        .death-cell.dead { opacity: 0.6; background: rgba(255,60,80,0.12); }
+        .death-cell .d-no { font-weight: bold; color: #9a93b5; }
+        .death-cell .d-name { color: #efeaff; word-break: break-word; }
+        .death-cell .d-role { color: #d7fbff; font-size: 0.9em; }
+        .death-cell .d-tags { color: #ff9de2; font-size: 0.9em; }
+        @media (max-width: 640px) { .death-grid { grid-template-columns: repeat(2, 1fr); } }
+        .notice-banner { padding: 8px 10px; border-radius: 8px; background: rgba(255,180,80,0.12); border: 1px solid rgba(255,180,80,0.4); color: #ffd27d; margin-top: 8px; font-size: 0.95rem; }
+        .notice-banner.warn { background: rgba(255,60,80,0.12); border-color: rgba(255,90,110,0.4); color: #ff9daa; }
+        .action-status { font-size: 0.95rem; color: #e6dcff; margin-bottom: 8px; }
+        .action-info { font-size: 0.95rem; color: #e6dcff; margin-bottom: 8px; }
+        .action-select-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0; }
+        .action-select-row select { margin: 0; }
+        .action-select-row input { margin: 0; }
+        .action-select-row button { margin: 0; }
+        .action-result { font-size: 0.95rem; color: #d7fbff; margin-top: 6px; }
+        .action-limit { font-size: 0.9rem; color: #ffb74d; }
+        .pending-list { font-size: 0.95rem; color: #ff9de2; margin: 6px 0; }
+        .vamp-participants { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 6px 0; }
+        .vamp-participant { display: inline-flex; align-items: center; gap: 4px; font-size: 0.95rem; color: #efeaff; cursor: pointer; }
+        .vamp-participant input { margin: 0; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: flex; align-items: center; justify-content: center; z-index: 50; }
+        .modal-overlay.hidden { display: none; }
+        .modal { background: #1c1533; border: 1px solid rgba(0,240,255,0.4); border-radius: 14px; padding: 22px 26px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 0 30px rgba(0,240,255,0.25); }
+        .modal p { color: #e8e6f0; margin: 0 0 16px; }
+        .modal select { width: 100%; margin: 0 0 16px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        footer { margin-top: 30px; text-align: center; color: #8a8a9a; font-size: 0.9em; }
     </style>
 </head>
 <body>
-    <h2>🎲 鬼村神秘小工具1.0</h2>
+    <div class="ghost-bg" aria-hidden="true"><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span></div>
+    <div class="content-wrap">
+        <div id="menuView" class="view">
+            <h1 class="site-title">👻 鬼村神秘小工具 3.0</h1>
+            <p class="menu-subtitle">请选择要进入的板块</p>
+            <div class="menu">
+                <button class="menu-btn" data-view="funBoardView">🎮 娱乐功能</button>
+                <button class="menu-btn" data-view="hostBoardView">🖥️ 主持人板块</button>
+                <button class="menu-btn" data-view="playerBoardView">👥 玩家板块</button>
+            </div>
+            <footer>© <span id="yearText">2025</span> 鬼村随机工具 · 由 <span id="provider">Polaris_KuiBiao</span> 提供</footer>
+        </div>
 
-    <!-- 功能1：随机数生成器 -->
-    <div class="section">
-        <h3>1. 随机数</h3>
-        <label>最小值: <input type="number" id="minNum" value="1"></label>
-        <label>最大值: <input type="number" id="maxNum" value="100"></label>
-        <button id="genNumber">生成随机数</button>
-        <div class="result" id="numResult">—</div>
-    </div>
+        <div id="funBoardView" class="view" hidden>
+            <div class="board-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🎮 娱乐功能</h2></div>
+            <div class="section"><h3>🎲 随机数</h3><label>最小值: <input type="number" id="minNum" value="1"></label><label>最大值: <input type="number" id="maxNum" value="100"></label><button id="genNumber">生成随机数</button><div class="result" id="numResult">—</div></div>
+            <div class="section"><h3>🍀 今日人品</h3><label>输入名字: <input type="text" id="fortuneName" placeholder="例如：喵喵"></label><button id="fortuneBtn">🔮 看看今日运气</button><div class="result" id="fortuneResult">—</div></div>
+            <div class="section"><h3>🍮 要不要相信果冻</h3><button id="jellyBtn">🍮 问果冻</button><div class="result" id="jellyResult">—</div></div>
+            <div class="section"><h3>🏆 牢冰会赢吗</h3><button id="laobingBtn">❓ 问问看</button><div class="result" id="laobingResult">—</div></div>
+        </div>
 
-    <!-- 功能2：15人身份分配 -->
-    <div class="section">
-        <h3>2. 15人身份分配</h3>
-        <p><strong>配置：</strong> 4普通村民 · 4吸血鬼 · 长老 · 预言家 · 女巫 · 守护者 · 猎人 · 丘比特 · 吹笛人</p>
-        <button id="assignBtn">🎲 随机分配身份</button>
-        <div id="assignmentResult" class="result" style="font-weight: normal; background: #f9f9f9;">
-            <div class="small" style="color: #888;">点击按钮生成分配</div>
+        <div id="hostBoardView" class="view" hidden>
+            <div class="board-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🖥️ 主持人板块</h2><button id="resetHostBtn" class="reset-host-btn">🔄 重置所有内容</button></div>
+            <div class="section">
+                <h3>🆔 15人身份分配</h3>
+                <p><strong>配置：</strong> 4普通村民 · 4吸血鬼 · 长老 · 预言家 · 女巫 · 守护者 · 猎人 · 丘比特 · 吹笛人</p>
+                <label>玩家姓名: <input type="text" id="playerNames" placeholder="按座位顺序输入15位玩家姓名，用空格或逗号分隔"></label>
+                <div class="btn-row">
+                    <button id="assignBtn">🎲 随机分配身份</button>
+                    <button id="saveAssignBtn">💾 保存分配</button>
+                    <button id="resetAssignBtn">🔓 重置</button>
+                </div>
+                <div class="faction-tabs">
+                    <button class="faction-tab active" data-faction="all">👥 全部</button>
+                    <button class="faction-tab" data-faction="villager">🧑‍🌾 村民</button>
+                    <button class="faction-tab" data-faction="vampire">🧛 吸血鬼</button>
+                    <button class="faction-tab" data-faction="god">✨ 神职</button>
+                </div>
+                <div id="assignmentResult" class="result"><div class="small" style="color: #888;">点击按钮生成分配</div></div>
+            </div>
+            <div class="section">
+                <h3>🖥️ 主持人控制台</h3>
+                <p class="console-note">上帝视角：死亡、情侣、夜晚行动与流程提醒。</p>
+                <div id="consolePanel" class="console-panel"></div>
+            </div>
+            <div class="section">
+                <h3>🗳️ 投票</h3>
+                <p class="vote-note">记录每名存活玩家的投票对象；警长的票计为 2 票。</p>
+                <label>👑 警长：<select id="sheriffSelect"></select></label>
+                <button id="sheriffElectionBtn">👑 开始警长竞选</button>
+                <button id="clearVoteBtn">🗳️ 清空本轮投票</button>
+                <button id="advanceDayBtn">🌙 进入下一阶段</button>
+                <div id="voteList" class="vote-list"></div>
+                <div id="voteResult" class="result">—</div>
+            </div>
+            <div class="section">
+                <h3>📜 村中日志</h3>
+                <p class="game-time-note">日志时间戳按当前游戏时间记录；游戏时间请在「主持人控制台 · 流程提醒」中设置（上限七天）。</p>
+                <textarea id="logInput" rows="3" placeholder="例如：警长投票投给了3号"></textarea>
+                <button id="logBtn">📝 记录今天</button>
+                <div id="logHint" class="log-hint"></div>
+                <div id="logList" class="log-list"></div>
+                <button id="clearLogBtn">🗑️ 清空所有日志</button>
+            </div>
+            <div class="section">
+                <h3>🎯 骰子工具</h3>
+                <div class="btn-row">
+                    <button class="dice-btn" data-faces="2">1d2</button>
+                    <button class="dice-btn" data-faces="6">1d6</button>
+                    <button class="dice-btn" data-faces="12">1d12</button>
+                    <button class="dice-btn" data-faces="18">1d18</button>
+                    <span>+</span>
+                    <input type="number" id="diceModifier" min="0" max="100" value="0" style="width: 80px;">
+                </div>
+                <div id="diceResult" class="result">—</div>
+            </div>
+        </div>
+
+        <div id="playerBoardView" class="view" hidden>
+            <div class="board-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">👥 玩家板块</h2></div>
+            <div class="section">
+                <h3>🔮 玩家推测</h3>
+                <p class="guess-note">根据玩家姓名推测每个人的阵营；选择「神职」可指定具体身份，「中立」即吹笛人。</p>
+                <div id="guessList" class="guess-list"></div>
+            </div>
+            <div class="section">
+                <h3>👥 玩家视图</h3>
+                <p class="console-note">玩家视角：仅显示姓名、序号与存活状态。</p>
+                <div id="playerViewPanel" class="console-panel"></div>
+            </div>
         </div>
     </div>
 
-    <!-- 功能3：今日人品 -->
-    <div class="section">
-        <h3>3. 今日人品</h3>
-        <label>输入名字: <input type="text" id="fortuneName" placeholder="例如：喵喵"></label>
-        <button id="fortuneBtn">🔮 看看今日运气</button>
-        <div class="result" id="fortuneResult">—</div>
+    <div id="confirmModal" class="modal-overlay hidden">
+        <div class="modal"><p>⚠️ 确定要清空所有日志吗？<br>此操作无法撤销。</p><div class="modal-actions"><button id="confirmYes">🗑️ 确认清空</button><button id="confirmNo">取消</button></div></div>
     </div>
-
-    <!-- 功能4：要不要相信果冻 -->
-    <div class="section">
-        <h3>4. 要不要相信果冻</h3>
-        <button id="jellyBtn">🍮 问果冻</button>
-        <div class="result" id="jellyResult">—</div>
+    <div id="piperConfirmModal" class="modal-overlay hidden">
+        <div class="modal"><p id="piperConfirmText">确定选择吹笛对象吗？</p><div class="modal-actions"><button id="piperConfirmYes">✅ 确认</button><button id="piperConfirmNo">取消</button></div></div>
     </div>
-
-    <!-- 功能5：牢冰会赢吗 -->
-    <div class="section">
-        <h3>5. 牢冰会赢吗</h3>
-        <button id="laobingBtn">❓ 问问看</button>
-        <div class="result" id="laobingResult">—</div>
+    <div id="vampConfirmModal" class="modal-overlay hidden">
+        <div class="modal"><p id="vampConfirmText">确认击杀吗？</p><div class="modal-actions"><button id="vampConfirmYes">🩸 确认击杀</button><button id="vampConfirmNo">取消</button></div></div>
     </div>
-
-    <footer>
-        © 2025 鬼村随机工具 · 由 <span id="provider">顾九曜</span> 提供
-    </footer>
+    <div id="hunterModal" class="modal-overlay hidden">
+        <div class="modal"><p id="hunterText">🔫 猎人已死亡，请选择开枪击杀对象</p><select id="hunterTargetSelect"></select><div class="modal-actions"><button id="hunterConfirm">🔫 确认开枪</button><button id="hunterCancel">取消</button></div></div>
+    </div>
+    <div id="sheriffTransferModal" class="modal-overlay hidden">
+        <div class="modal"><p id="sheriffTransferText">👑 警长已死亡，请选择移交对象</p><select id="sheriffTargetSelect"></select><div class="modal-actions"><button id="sheriffTransferConfirm">👑 确认移交</button><button id="sheriffTransferCancel">取消</button></div></div>
+    </div>
+    <div id="advanceNightModal" class="modal-overlay hidden">
+        <div class="modal"><p id="advanceNightText">是否进入下一阶段？</p><div class="modal-actions"><button id="advanceNightYes">🌅 确认</button><button id="advanceNightNo">取消</button></div></div>
+    </div>
+    <div id="advanceDayModal" class="modal-overlay hidden">
+        <div class="modal"><p id="advanceDayText">是否进入下一阶段？</p><div class="modal-actions"><button id="advanceDayYes">🌙 确认</button><button id="advanceDayNo">取消</button></div></div>
+    </div>
+    <div id="playerDeathModal" class="modal-overlay hidden">
+        <div class="modal"><p>选择死亡原因</p><select id="playerDeathReason"><option>投票处决</option><option>吸血鬼击杀</option><option>女巫毒杀</option><option>猎人开枪击杀</option><option>情侣殉情</option></select><div class="modal-actions"><button id="playerDeathConfirm">💀 确认死亡</button><button id="playerDeathCancel">取消</button></div></div>
+    </div>
+    <div id="resetDeathModal" class="modal-overlay hidden">
+        <div class="modal"><p>🔄 确定要重置所有玩家的死亡状态吗？<br>（将复活所有玩家，并恢复长老生命与神职技能）</p><div class="modal-actions"><button id="resetDeathYes">🔄 确认重置</button><button id="resetDeathNo">取消</button></div></div>
+    </div>
+    <div id="resetHostModal" class="modal-overlay hidden">
+        <div class="modal"><p>🔄 确定要重置主持人板块的所有内容吗？<br>（将清空身份分配、死亡、情侣、夜晚行动、投票、日志与游戏时间）</p><div class="modal-actions"><button id="resetHostYes">🔄 确认重置</button><button id="resetHostNo">取消</button></div></div>
+    </div>
 
     <script>
         (function() {
-            // ---------- 功能1：随机数 ----------
+            function showView(viewId) {
+                document.querySelectorAll('.view').forEach(function(v) { v.hidden = true; });
+                const target = document.getElementById(viewId); if (target) target.hidden = false;
+                window.scrollTo(0, 0);
+            }
+            document.querySelectorAll('.menu-btn').forEach(function(btn) { btn.addEventListener('click', function() { showView(btn.getAttribute('data-view')); }); });
+            document.querySelectorAll('.back-btn').forEach(function(btn) { btn.addEventListener('click', function() { showView(btn.getAttribute('data-back')); }); });
+
+            // ================= 共享游戏状态与持久化 =================
+            const deadSet = new Set();
+            const deathReasons = {};
+            const deathTimes = {};
+            let coupleA = -1;
+            let coupleB = -1;
+            let coupleLocked = false;
+            let elderLives = 2;
+            let godsDisabled = false;
+
+            const DEAD_KEY = 'village_dead';
+            const DEATH_REASONS_KEY = 'village_death_reasons';
+            const DEATH_TIMES_KEY = 'village_death_times';
+            const COUPLE_KEY = 'village_couple';
+            const ELDER_KEY = 'village_elder';
+
+            const REASON_VOTE = '投票处决';
+            const REASON_VAMPIRE = '吸血鬼击杀';
+            const REASON_POISON = '女巫毒药毒杀';
+            const REASON_HUNTER = '猎人开枪击杀';
+            const REASON_COUPLE = '情侣殉情';
+
+            function isDead(i) { return deadSet.has(i); }
+            function deathReason(i) { return deathReasons[i] || ''; }
+            function saveDeadState() {
+                localStorage.setItem(DEAD_KEY, JSON.stringify(Array.from(deadSet)));
+                localStorage.setItem(DEATH_REASONS_KEY, JSON.stringify(deathReasons));
+                localStorage.setItem(DEATH_TIMES_KEY, JSON.stringify(deathTimes));
+            }
+            function loadDeadState() {
+                deadSet.clear();
+                try { const arr = JSON.parse(localStorage.getItem(DEAD_KEY)); if (Array.isArray(arr)) arr.forEach(function(i) { deadSet.add(i); }); } catch (e) {}
+                for (const k in deathReasons) delete deathReasons[k];
+                for (const k in deathTimes) delete deathTimes[k];
+                try { const r = JSON.parse(localStorage.getItem(DEATH_REASONS_KEY)); if (r && typeof r === 'object') for (const k in r) deathReasons[k] = r[k]; } catch (e) {}
+                try { const t = JSON.parse(localStorage.getItem(DEATH_TIMES_KEY)); if (t && typeof t === 'object') for (const k in t) deathTimes[k] = t[k]; } catch (e) {}
+            }
+            function loadCouple() {
+                try { const c = JSON.parse(localStorage.getItem(COUPLE_KEY)); if (c && typeof c.a === 'number' && typeof c.b === 'number') { if (c.a >= 0 && c.a === c.b) c.b = -1; return c; } } catch (e) {}
+                return { a: -1, b: -1, locked: false };
+            }
+            function saveCouple() { localStorage.setItem(COUPLE_KEY, JSON.stringify({ a: coupleA, b: coupleB, locked: coupleLocked })); }
+            function saveElderState() { localStorage.setItem(ELDER_KEY, JSON.stringify({ lives: elderLives, godsDisabled: godsDisabled })); }
+            function loadElderState() {
+                try { const e = JSON.parse(localStorage.getItem(ELDER_KEY)); if (e && typeof e === 'object') { elderLives = (typeof e.lives === 'number') ? e.lives : 2; godsDisabled = !!e.godsDisabled; } } catch (e) {}
+            }
+
+            (function initSharedState() {
+                loadDeadState();
+                const c = loadCouple(); coupleA = c.a; coupleB = c.b; coupleLocked = !!c.locked;
+                loadElderState();
+            })();
+
+            // ---------- 娱乐：随机数 ----------
             const minInput = document.getElementById('minNum');
             const maxInput = document.getElementById('maxNum');
             const genBtn = document.getElementById('genNumber');
             const numRes = document.getElementById('numResult');
+            genBtn.addEventListener('click', function() { let min = parseInt(minInput.value, 10); let max = parseInt(maxInput.value, 10); if (isNaN(min)) min = 1; if (isNaN(max)) max = 100; if (min > max) [min, max] = [max, min]; numRes.textContent = Math.floor(Math.random() * (max - min + 1)) + min; });
 
-            genBtn.addEventListener('click', function() {
-                let min = parseInt(minInput.value, 10);
-                let max = parseInt(maxInput.value, 10);
-                if (isNaN(min)) min = 1;
-                if (isNaN(max)) max = 100;
-                if (min > max) [min, max] = [max, min];
-
-                const rand = Math.floor(Math.random() * (max - min + 1)) + min;
-                numRes.textContent = rand;
-            });
-
-            // ---------- 功能2：15人身份分配 ----------
+            // ---------- 主持人：15人身份分配 ----------
             const assignBtn = document.getElementById('assignBtn');
             const assignmentDiv = document.getElementById('assignmentResult');
-
-            const ROLE_POOL = [
-                '普通村民', '普通村民', '普通村民', '普通村民',
-                '吸血鬼', '吸血鬼', '吸血鬼', '吸血鬼',
-                '长老', '预言家', '女巫', '守护者', '猎人', '丘比特', '吹笛人'
-            ];
-
-            function shuffleArray(arr) {
-                const a = [...arr];
-                for (let i = a.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [a[i], a[j]] = [a[j], a[i]];
-                }
-                return a;
-            }
-
-            function generateAssignment() {
-                const shuffled = shuffleArray(ROLE_POOL);
+            const playerNamesInput = document.getElementById('playerNames');
+            const saveAssignBtn = document.getElementById('saveAssignBtn');
+            const resetAssignBtn = document.getElementById('resetAssignBtn');
+            const factionTabs = Array.from(document.querySelectorAll('.faction-tab'));
+            const ROLE_POOL = ['普通村民','普通村民','普通村民','普通村民','吸血鬼','吸血鬼','吸血鬼','吸血鬼','长老','预言家','女巫','守护者','猎人','丘比特','吹笛人'];
+            function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+            const ASSIGN_SAVE_KEY = 'village_assignment_saved';
+            let currentRoles = null;
+            let playerNamesArr = [];
+            let currentFaction = 'all';
+            let isLocked = false;
+            function parsePlayerNames(raw) { if (!raw || !raw.trim()) return []; return raw.trim().split(/[\s,，、;；]+/).filter(Boolean).slice(0, 15); }
+            function roleFaction(role) { if (role === '普通村民') return 'villager'; if (role === '吸血鬼') return 'vampire'; return 'god'; }
+            function factionMatches(role, faction) { if (faction === 'all') return true; return roleFaction(role) === faction; }
+            function generateAssignment() { currentRoles = shuffleArray(ROLE_POOL); }
+            function renderAssignment() {
+                playerNamesArr = parsePlayerNames(playerNamesInput.value);
                 let html = '<div class="assignment-grid">';
-                for (let i = 0; i < 15; i++) {
-                    html += `<div class="assignment-item"><strong>${i+1}号</strong>：${shuffled[i]}</div>`;
-                }
+                if (currentRoles) { for (let i = 0; i < 15; i++) { const role = currentRoles[i]; if (!factionMatches(role, currentFaction)) continue; const namePart = playerNamesArr[i] ? `（${playerNamesArr[i]}）` : ''; html += `<div class="assignment-item"><strong>${i+1}号</strong>${namePart}：${role}</div>`; } }
                 html += '</div>';
+                html += `<div class="assignment-tip">${isLocked ? '🔒 分配已保存并锁定' : '💡 点击「保存分配」可锁定当前角色，防止刷新后重新分配'}</div>`;
                 assignmentDiv.innerHTML = html;
             }
+            function renderStatsHtml() {
+                let v = 0, va = 0, mp = 0, mpa = 0, g = 0, ga = 0;
+                if (currentRoles) { for (let i = 0; i < currentRoles.length; i++) { const f = roleFaction(currentRoles[i]); const alive = !isDead(i); if (f === 'villager') { v++; if (alive) va++; } else if (f === 'vampire') { mp++; if (alive) mpa++; } else { g++; if (alive) ga++; } } }
+                return `<div class="assignment-stats" title="存活人数 / 总人数">👥 统计：普通村民 <b>${va}</b><span class="stat-total">/${v}</span>人 · 吸血鬼 <b>${mpa}</b><span class="stat-total">/${mp}</span>人 · 神职 <b>${ga}</b><span class="stat-total">/${g}</span>人</div>`;
+            }
+            function setLocked(locked) { isLocked = locked; assignBtn.disabled = locked; playerNamesInput.disabled = locked; saveAssignBtn.disabled = locked; saveAssignBtn.textContent = locked ? '🔒 已保存' : '💾 保存分配'; }
+            function loadSavedAssignment() { try { const data = JSON.parse(localStorage.getItem(ASSIGN_SAVE_KEY)); if (data && Array.isArray(data.roles) && data.roles.length === 15) return data; } catch (e) {} return null; }
+            function saveAssignment() { if (!currentRoles) generateAssignment(); localStorage.setItem(ASSIGN_SAVE_KEY, JSON.stringify({ names: parsePlayerNames(playerNamesInput.value), roles: [...currentRoles] })); setLocked(true); refreshGameViews(); }
+            function resetAssignment() { localStorage.removeItem(ASSIGN_SAVE_KEY); setLocked(false); refreshGameViews(); }
+            function initAssignment() { const saved = loadSavedAssignment(); if (saved) { playerNamesInput.value = (saved.names || []).join(' '); currentRoles = [...saved.roles]; setLocked(true); renderAssignment(); } else { setLocked(false); generateAssignment(); renderAssignment(); } }
+            assignBtn.addEventListener('click', function() { generateAssignment(); refreshGameViews(); });
+            saveAssignBtn.addEventListener('click', saveAssignment);
+            resetAssignBtn.addEventListener('click', resetAssignment);
+            factionTabs.forEach(function(tab) { tab.addEventListener('click', function() { currentFaction = tab.getAttribute('data-faction'); factionTabs.forEach(function(t) { t.classList.toggle('active', t === tab); }); refreshGameViews(); }); });
+            initAssignment();
 
-            assignBtn.addEventListener('click', generateAssignment);
-            generateAssignment();
-
-            // ---------- 功能3：今日人品 ----------
+            // ---------- 娱乐：今日人品 ----------
             const fortuneNameInput = document.getElementById('fortuneName');
             const fortuneBtn = document.getElementById('fortuneBtn');
             const fortuneResult = document.getElementById('fortuneResult');
-
-            // 获取今日日期字符串 (YYYY-MM-DD)
-            function getTodayString() {
-                const d = new Date();
-                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-            }
-
-            // 根据分数返回等级描述
-            function getFortuneLevel(score) {
-                if (score >= 1 && score <= 20) return '大凶';
-                if (score <= 40) return '中凶';
-                if (score <= 50) return '小凶';
-                if (score <= 60) return '小吉';
-                if (score <= 80) return '中吉';
-                if (score <= 100) return '大吉';
-                return '未知';
-            }
-
+            function getTodayString() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+            function getFortuneLevel(score) { if (score >= 1 && score <= 20) return '大凶'; if (score <= 40) return '中凶'; if (score <= 50) return '小凶'; if (score <= 60) return '小吉'; if (score <= 80) return '中吉'; if (score <= 100) return '大吉'; return '未知'; }
             fortuneBtn.addEventListener('click', function() {
-                const name = fortuneNameInput.value.trim();
-                if (!name) {
-                    fortuneResult.textContent = '请输入名字';
-                    return;
-                }
-
-                const today = getTodayString();
-                const storageKey = `fortune_${name}`;
-                const stored = localStorage.getItem(storageKey);
-
-                let score;
-                let storedDate;
-
-                if (stored) {
-                    try {
-                        const data = JSON.parse(stored);
-                        if (data.date === today) {
-                            score = data.score;
-                        } else {
-                            // 日期不同，重新生成
-                            score = Math.floor(Math.random() * 100) + 1;
-                            localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
-                        }
-                    } catch (e) {
-                        // 解析失败，重新生成
-                        score = Math.floor(Math.random() * 100) + 1;
-                        localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
-                    }
-                } else {
-                    // 无记录，生成新记录
-                    score = Math.floor(Math.random() * 100) + 1;
-                    localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score }));
-                }
-
-                const level = getFortuneLevel(score);
-                fortuneResult.textContent = `${score} · ${level}`;
+                const name = fortuneNameInput.value.trim(); if (!name) { fortuneResult.textContent = '请输入名字'; return; }
+                const today = getTodayString(); const storageKey = `fortune_${name}`; const stored = localStorage.getItem(storageKey); let score;
+                if (stored) { try { const data = JSON.parse(stored); if (data.date === today) score = data.score; else { score = Math.floor(Math.random() * 100) + 1; localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score })); } } catch (e) { score = Math.floor(Math.random() * 100) + 1; localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score })); } }
+                else { score = Math.floor(Math.random() * 100) + 1; localStorage.setItem(storageKey, JSON.stringify({ date: today, score: score })); }
+                fortuneResult.textContent = `${score} · ${getFortuneLevel(score)}`;
             });
 
-            // ---------- 功能4：要不要相信果冻 ----------
+            // ---------- 娱乐：问果冻 ----------
             const jellyBtn = document.getElementById('jellyBtn');
             const jellyResult = document.getElementById('jellyResult');
+            const jellyBelieve = ['相信果冻，它会带来好运！','相信果冻，对的对的对的。','相信果冻，偶尔也有真话。','相信果冻，给他吃可可果。'];
+            const jellyNotBelieve = ['不相信果冻，它会带来不幸！','不相信果冻，不对不对不对。','不相信果冻，嘴里全是假话。','不相信果冻，绿色鼻涕走开！'];
+            jellyBtn.addEventListener('click', function() { const r = Math.random(); jellyResult.textContent = r < 0.5 ? '✨ 相信果冻 · ' + jellyBelieve[Math.floor(Math.random() * jellyBelieve.length)] : '❌ 不相信果冻 · ' + jellyNotBelieve[Math.floor(Math.random() * jellyNotBelieve.length)]; });
 
-            const jellyBelieve = [
-                '相信果冻，它会带来好运！',
-                '相信果冻，对的对的对的。',
-                '相信果冻，偶尔也有真话。',
-                '相信果冻，给他吃可可果。'
-            ];
-            const jellyNotBelieve = [
-                '不相信果冻，它会带来不幸！',
-                '不相信果冻，不对不对不对。',
-                '不相信果冻，嘴里全是假话。',
-                '不相信果冻，绿色鼻涕走开！'
-            ];
-
-            jellyBtn.addEventListener('click', function() {
-                const r = Math.random();
-                if (r < 0.5) {
-                    // 相信
-                    const msg = jellyBelieve[Math.floor(Math.random() * jellyBelieve.length)];
-                    jellyResult.textContent = '✨ 相信果冻 · ' + msg;
-                } else {
-                    // 不相信
-                    const msg = jellyNotBelieve[Math.floor(Math.random() * jellyNotBelieve.length)];
-                    jellyResult.textContent = '❌ 不相信果冻 · ' + msg;
-                }
-            });
-
-            // ---------- 功能5：牢冰会赢吗 ----------
+            // ---------- 娱乐：牢冰会赢吗 ----------
             const laobingBtn = document.getElementById('laobingBtn');
             const laobingResult = document.getElementById('laobingResult');
+            laobingBtn.addEventListener('click', function() { laobingResult.textContent = Math.random() < 0.5 ? '🏆 该赢了吧！' : '💔 接着输...'; });
 
-            laobingBtn.addEventListener('click', function() {
-                const r = Math.random();
-                if (r < 0.5) {
-                    laobingResult.textContent = '🏆 该赢了吧！';
+            // ================= 主持人：村中日志 =================
+            const logInput = document.getElementById('logInput');
+            const logBtn = document.getElementById('logBtn');
+            const logList = document.getElementById('logList');
+            const logHint = document.getElementById('logHint');
+            const clearLogBtn = document.getElementById('clearLogBtn');
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            const VILLAGE_LOG_KEY = 'village_log';
+            const GAME_TIME_KEY = 'village_game_time';
+            const DAY_NAMES = ['一','二','三','四','五','六','七'];
+            let gameDay = 1;
+            let gamePhase = '白天';
+            function chineseDay(n) { return DAY_NAMES[n - 1]; }
+            function loadGameTime() { try { const data = JSON.parse(localStorage.getItem(GAME_TIME_KEY)); if (data && typeof data.day === 'number' && (data.phase === '白天' || data.phase === '夜晚')) { gameDay = Math.min(7, Math.max(1, data.day)); gamePhase = data.phase; } } catch (e) {} }
+            function saveGameTime() { localStorage.setItem(GAME_TIME_KEY, JSON.stringify({ day: gameDay, phase: gamePhase })); }
+            function getGameTimeStamp() { return `第${chineseDay(gameDay)}天${gamePhase}`; }
+            function makeLogId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+            function escapeLogHtml(str) { return String(str).replace(/[&<>"']/g, function(ch) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]; }); }
+            function loadVillageLogs() { try { const parsed = JSON.parse(localStorage.getItem(VILLAGE_LOG_KEY)); if (Array.isArray(parsed)) return parsed; } catch (e) {} return []; }
+            function saveVillageLogs(logs) { localStorage.setItem(VILLAGE_LOG_KEY, JSON.stringify(logs)); }
+            function renderVillageLogs() {
+                const logs = loadVillageLogs();
+                if (!logs.length) { logList.innerHTML = '<div class="log-empty">🌙 夜深了，还没有任何记录...</div>'; clearLogBtn.style.display = 'none'; return; }
+                clearLogBtn.style.display = '';
+                let html = '';
+                for (const log of [...logs].reverse()) html += `<div class="log-entry" data-id="${log.id}"><span class="log-time">${log.time}</span><span class="log-text">${escapeLogHtml(log.text)}</span><button class="log-del" data-id="${log.id}">❌ 删除</button></div>`;
+                logList.innerHTML = html;
+            }
+            function addVillageLog() { const text = logInput.value.trim(); if (!text) { logHint.textContent = '⚠️ 请先输入日志内容'; return; } const logs = loadVillageLogs(); logs.push({ id: makeLogId(), time: getGameTimeStamp(), text: text }); saveVillageLogs(logs); logInput.value = ''; logHint.textContent = ''; renderVillageLogs(); }
+            function appendAutoLog(text) { const logs = loadVillageLogs(); logs.push({ id: makeLogId(), time: getGameTimeStamp(), text: text }); saveVillageLogs(logs); renderVillageLogs(); }
+            function deleteVillageLog(id) { let logs = loadVillageLogs(); logs = logs.filter(function(l) { return l.id !== id; }); saveVillageLogs(logs); renderVillageLogs(); }
+            logBtn.addEventListener('click', addVillageLog);
+            logInput.addEventListener('input', function() { logHint.textContent = ''; });
+            logList.addEventListener('click', function(e) { const delBtn = e.target.closest('.log-del'); if (!delBtn) return; deleteVillageLog(delBtn.getAttribute('data-id')); });
+            clearLogBtn.addEventListener('click', function() { confirmModal.classList.remove('hidden'); });
+            confirmYes.addEventListener('click', function() { localStorage.removeItem(VILLAGE_LOG_KEY); confirmModal.classList.add('hidden'); renderVillageLogs(); });
+            confirmNo.addEventListener('click', function() { confirmModal.classList.add('hidden'); });
+            confirmModal.addEventListener('click', function(e) { if (e.target === confirmModal) confirmModal.classList.add('hidden'); });
+            loadGameTime();
+            renderVillageLogs();
+
+            // ================= 玩家：玩家推测 =================
+            const guessList = document.getElementById('guessList');
+            const GUESSES_KEY = 'village_guesses';
+            const GOD_ROLE_LIST = ['长老','预言家','女巫','守护者','猎人','丘比特'];
+            let guesses = [];
+            function defaultGuesses() { return Array.from({ length: 15 }, function() { return { name: '', category: '', godRole: '' }; }); }
+            function loadGuesses() { try { const parsed = JSON.parse(localStorage.getItem(GUESSES_KEY)); if (Array.isArray(parsed) && parsed.length === 15) { parsed.forEach(function(g) { if (g && g.godRole === '吹笛人') { g.category = 'neutral'; g.godRole = ''; } }); return parsed; } } catch (e) {} return defaultGuesses(); }
+            function saveGuesses() { localStorage.setItem(GUESSES_KEY, JSON.stringify(guesses)); }
+            function escapeAttr(str) { return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+            function renderGuesses() {
+                let html = '';
+                for (let i = 0; i < 15; i++) {
+                    const g = guesses[i]; const showGod = g.category === 'god';
+                    html += `<div class="guess-cell"><span class="guess-no">${i + 1}号</span><input type="text" class="guess-name" data-index="${i}" placeholder="姓名" value="${escapeAttr(g.name)}">` +
+                        `<select class="guess-cat" data-index="${i}"><option value=""${g.category === '' ? ' selected' : ''}>— 推测 —</option><option value="villager"${g.category === 'villager' ? ' selected' : ''}>普通村民</option><option value="vampire"${g.category === 'vampire' ? ' selected' : ''}>吸血鬼</option><option value="god"${g.category === 'god' ? ' selected' : ''}>神职</option><option value="neutral"${g.category === 'neutral' ? ' selected' : ''}>中立（吹笛人）</option></select>` +
+                        `<select class="guess-god" data-index="${i}"${showGod ? '' : ' hidden'}><option value=""${g.godRole === '' ? ' selected' : ''}>— 神职身份 —</option>`;
+                    for (const role of GOD_ROLE_LIST) html += `<option${g.godRole === role ? ' selected' : ''}>${role}</option>`;
+                    html += `</select></div>`;
+                }
+                guessList.innerHTML = html;
+            }
+            guessList.addEventListener('input', function(e) { if (e.target.classList.contains('guess-name')) { const idx = parseInt(e.target.getAttribute('data-index'), 10); guesses[idx].name = e.target.value; saveGuesses(); } });
+            guessList.addEventListener('change', function(e) { const idx = parseInt(e.target.getAttribute('data-index'), 10); if (e.target.classList.contains('guess-cat')) { guesses[idx].category = e.target.value; if (e.target.value !== 'god') guesses[idx].godRole = ''; saveGuesses(); renderGuesses(); } else if (e.target.classList.contains('guess-god')) { guesses[idx].godRole = e.target.value; saveGuesses(); } });
+            guesses = loadGuesses();
+            renderGuesses();
+
+            // ================= 主持人：投票 =================
+            const voteList = document.getElementById('voteList');
+            const voteResultDiv = document.getElementById('voteResult');
+            const sheriffSelect = document.getElementById('sheriffSelect');
+            const clearVoteBtn = document.getElementById('clearVoteBtn');
+            const sheriffElectionBtn = document.getElementById('sheriffElectionBtn');
+            const VOTE_KEY = 'village_votes';
+            let voteVotes = [];
+            let voteSheriff = -1;
+            let sheriffElectionMode = false;
+            function defaultVotes() { return new Array(15).fill(-1); }
+            function loadVotes() { try { const data = JSON.parse(localStorage.getItem(VOTE_KEY)); if (data && Array.isArray(data.votes) && data.votes.length === 15) return data; } catch (e) {} return { votes: defaultVotes(), sheriff: -1 }; }
+            function saveVotes() { localStorage.setItem(VOTE_KEY, JSON.stringify({ votes: voteVotes, sheriff: voteSheriff })); }
+            function refreshSheriffSelect() { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 无警长 —</option>'; for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${voteSheriff === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } sheriffSelect.innerHTML = opts; }
+            function renderVoteList() {
+                refreshSheriffSelect(); const names = parsePlayerNames(playerNamesInput.value); let html = '';
+                for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; const dead = isDead(i); const isSheriff = (voteSheriff === i); let opts = '<option value="-1">弃票</option>'; for (let t = 0; t < 15; t++) { if (isDead(t)) continue; const tnm = names[t] ? `（${names[t]}）` : ''; opts += `<option value="${t}"${voteVotes[i] === t ? ' selected' : ''}>${t + 1}号${tnm}</option>`; } html += `<div class="vote-row${dead ? ' dead' : ''}"><span class="vote-voter">${i + 1}号${nm}${isSheriff ? ' 👑' : ''}${dead ? ' 💀' : ''}</span><span class="vote-arrow">→</span><select class="vote-target" data-index="${i}"${dead ? ' disabled' : ''}>${opts}</select></div>`; }
+                voteList.innerHTML = html; renderVoteResult();
+            }
+            function computeVoteRanking() { const counts = new Array(15).fill(0); let abstain = 0; let aliveVoters = 0; for (let v = 0; v < 15; v++) { if (isDead(v)) continue; aliveVoters++; const t = voteVotes[v]; if (t < 0 || t >= 15 || isDead(t)) { abstain++; continue; } const weight = (!sheriffElectionMode && v === voteSheriff) ? 2 : 1; counts[t] += weight; } const ranked = []; for (let t = 0; t < 15; t++) if (counts[t] > 0) ranked.push({ target: t, votes: counts[t] }); ranked.sort(function(a, b) { return b.votes - a.votes; }); return { ranked: ranked, abstain: abstain, aliveVoters: aliveVoters }; }
+            function renderVoteResult() {
+                const r = computeVoteRanking(); let html;
+                if (sheriffElectionMode) {
+                    html = `<div class="vote-tally-title">👑 警长竞选票数统计（存活投票 ${r.aliveVoters} 人 · 弃票 ${r.abstain} 人）</div>`;
+                    if (!r.ranked.length) html += '<div class="vote-none">暂无有效投票</div>';
+                    else {
+                        const maxVotes = r.ranked[0].votes; const top = r.ranked.filter(function(x) { return x.votes === maxVotes; });
+                        html += '<ol class="vote-ranking">'; for (const x of r.ranked) html += `<li>${x.target + 1}号：<b>${x.votes}</b> 票</li>`; html += '</ol>';
+                        if (top.length > 1) html += `<div class="vote-verdict">⚖️ 平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）</div>`;
+                        else { html += `<div class="vote-verdict">👑 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 当选警长</div>`; html += `<button class="confirm-sheriff-btn" data-target="${top[0].target}">👑 确认竞选（${top[0].target + 1}号当选警长）</button>`; }
+                    }
                 } else {
-                    laobingResult.textContent = '💔 接着输...';
+                    html = `<div class="vote-tally-title">📊 票数统计（存活投票 ${r.aliveVoters} 人 · 弃票 ${r.abstain} 人）</div>`;
+                    if (!r.ranked.length) html += '<div class="vote-none">暂无有效投票</div>';
+                    else { const maxVotes = r.ranked[0].votes; const top = r.ranked.filter(function(x) { return x.votes === maxVotes; }); html += '<ol class="vote-ranking">'; for (const x of r.ranked) html += `<li>${x.target + 1}号：<b>${x.votes}</b> 票</li>`; html += '</ol>'; if (top.length > 1) html += `<div class="vote-verdict">⚖️ 平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）</div>`; else if (isDead(top[0].target)) html += `<div class="vote-verdict">⚖️ ${top[0].target + 1}号 已被处决</div>`; else { html += `<div class="vote-verdict">⚖️ 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 将被处决</div>`; html += `<button class="exec-btn" data-target="${top[0].target}">⚖️ 确认处决（标记死亡）</button>`; } }
+                }
+                voteResultDiv.innerHTML = html;
+            }
+            function executePlayer(target) { if (isDead(target)) return; writeVoteLog(); markDead(target, REASON_VOTE); finishDeathResolution(); }
+            voteList.addEventListener('change', function(e) { if (e.target.classList.contains('vote-target')) { const idx = parseInt(e.target.getAttribute('data-index'), 10); voteVotes[idx] = parseInt(e.target.value, 10); saveVotes(); renderVoteResult(); } });
+            voteResultDiv.addEventListener('click', function(e) {
+                const execBtn = e.target.closest('.exec-btn');
+                if (execBtn) { executePlayer(parseInt(execBtn.getAttribute('data-target'), 10)); return; }
+                const sheriffBtn = e.target.closest('.confirm-sheriff-btn');
+                if (sheriffBtn) { confirmSheriff(parseInt(sheriffBtn.getAttribute('data-target'), 10)); }
+            });
+            sheriffSelect.addEventListener('change', function() { voteSheriff = sheriffSelect.value === '' ? -1 : parseInt(sheriffSelect.value, 10); saveVotes(); renderVoteList(); });
+            clearVoteBtn.addEventListener('click', function() { voteVotes = defaultVotes(); voteSheriff = -1; saveVotes(); renderVoteList(); });
+            sheriffElectionBtn.addEventListener('click', function() {
+                sheriffElectionMode = !sheriffElectionMode;
+                if (sheriffElectionMode) { voteVotes = defaultVotes(); voteSheriff = -1; }
+                saveVotes();
+                sheriffElectionBtn.textContent = sheriffElectionMode ? '🔙 退出警长竞选' : '👑 开始警长竞选';
+                renderVoteList();
+            });
+            function confirmSheriff(target) {
+                writeVoteLog();
+                voteSheriff = target;
+                sheriffElectionMode = false;
+                voteVotes = defaultVotes();
+                saveVotes();
+                sheriffElectionBtn.textContent = '👑 开始警长竞选';
+                renderVoteList();
+                renderConsole();
+            }
+            function writeVoteLog() {
+                const groups = {};
+                const abstainers = [];
+                for (let v = 0; v < 15; v++) {
+                    if (isDead(v)) continue;
+                    const t = voteVotes[v];
+                    if (t < 0 || t >= 15 || isDead(t)) { abstainers.push(v); continue; }
+                    if (!groups[t]) groups[t] = [];
+                    groups[t].push(v);
+                }
+                const lines = [];
+                lines.push(`【${getGameTimeStamp()}${sheriffElectionMode ? '警长竞选' : '投票'}】`);
+                const targets = Object.keys(groups).map(Number).sort(function(a, b) { return groups[b].length - groups[a].length; });
+                for (const t of targets) {
+                    const voters = groups[t].map(function(i) { return playerLabel(i) + (i === voteSheriff ? '（警长2票）' : ''); }).join('、');
+                    lines.push(`投给 ${playerLabel(t)}：${voters}`);
+                }
+                if (abstainers.length) lines.push(`弃权：${abstainers.map(function(i) { return playerLabel(i); }).join('、')}`);
+                const r = computeVoteRanking();
+                if (r.ranked.length) {
+                    const maxVotes = r.ranked[0].votes;
+                    const top = r.ranked.filter(function(x) { return x.votes === maxVotes; });
+                    if (top.length > 1) lines.push(`平票：${top.map(function(x) { return playerLabel(x.target); }).join('、')}`);
+                    else if (sheriffElectionMode) lines.push(`警长当选：${playerLabel(top[0].target)}（${maxVotes}票）`);
+                    else lines.push(`处决：${playerLabel(top[0].target)}（${maxVotes}票）`);
+                } else lines.push('无有效投票');
+                appendAutoLog(lines.join('\n'));
+            }
+            (function initVote() { const data = loadVotes(); voteVotes = data.votes || defaultVotes(); voteSheriff = (typeof data.sheriff === 'number') ? data.sheriff : -1; renderVoteList(); })();
+
+            // ================= 主持人：主持人控制台 / 玩家视图 =================
+            const consolePanel = document.getElementById('consolePanel');
+            const playerViewPanel = document.getElementById('playerViewPanel');
+            const piperConfirmModal = document.getElementById('piperConfirmModal');
+            const piperConfirmText = document.getElementById('piperConfirmText');
+            const piperConfirmYes = document.getElementById('piperConfirmYes');
+            const piperConfirmNo = document.getElementById('piperConfirmNo');
+            const vampConfirmModal = document.getElementById('vampConfirmModal');
+            const vampConfirmText = document.getElementById('vampConfirmText');
+            const vampConfirmYes = document.getElementById('vampConfirmYes');
+            const vampConfirmNo = document.getElementById('vampConfirmNo');
+            const hunterModal = document.getElementById('hunterModal');
+            const hunterTargetSelect = document.getElementById('hunterTargetSelect');
+            const hunterConfirm = document.getElementById('hunterConfirm');
+            const hunterCancel = document.getElementById('hunterCancel');
+            const sheriffTransferModal = document.getElementById('sheriffTransferModal');
+            const sheriffTargetSelect = document.getElementById('sheriffTargetSelect');
+            const sheriffTransferConfirm = document.getElementById('sheriffTransferConfirm');
+            const sheriffTransferCancel = document.getElementById('sheriffTransferCancel');
+            const advanceNightModal = document.getElementById('advanceNightModal');
+            const advanceNightText = document.getElementById('advanceNightText');
+            const advanceNightYes = document.getElementById('advanceNightYes');
+            const advanceNightNo = document.getElementById('advanceNightNo');
+            const advanceDayModal = document.getElementById('advanceDayModal');
+            const advanceDayText = document.getElementById('advanceDayText');
+            const advanceDayYes = document.getElementById('advanceDayYes');
+            const advanceDayNo = document.getElementById('advanceDayNo');
+            const advanceDayBtn = document.getElementById('advanceDayBtn');
+            const playerDeathModal = document.getElementById('playerDeathModal');
+            const playerDeathReason = document.getElementById('playerDeathReason');
+            const playerDeathConfirm = document.getElementById('playerDeathConfirm');
+            const playerDeathCancel = document.getElementById('playerDeathCancel');
+            const PUBLIC_DEATHS_KEY = 'village_public_deaths';
+            const PUBLIC_ROLES = ['普通村民','吸血鬼','长老','预言家','女巫','守护者','猎人','丘比特','吹笛人'];
+            let publicDeaths = {};
+            let pendingPlayerDeathIndex = -1;
+            function loadPublicDeaths() { try { const d = JSON.parse(localStorage.getItem(PUBLIC_DEATHS_KEY)); if (d && typeof d === 'object') return d; } catch (e) {} return {}; }
+            function savePublicDeaths() { localStorage.setItem(PUBLIC_DEATHS_KEY, JSON.stringify(publicDeaths)); }
+            function roleOptions(selected) { let opts = ''; for (const r of PUBLIC_ROLES) opts += `<option${selected === r ? ' selected' : ''}>${r}</option>`; return opts; }
+            let playerDay = 1;
+            let playerPhase = '白天';
+            const PLAYER_TIME_KEY = 'village_player_time';
+            function getPlayerTimeStamp() { return `第${chineseDay(playerDay)}天${playerPhase}`; }
+            function loadPlayerTime() { try { const d = JSON.parse(localStorage.getItem(PLAYER_TIME_KEY)); if (d && typeof d.day === 'number') { playerDay = Math.min(7, Math.max(1, d.day)); playerPhase = (d.phase === '夜晚') ? '夜晚' : '白天'; } } catch (e) {} }
+            function savePlayerTime() { localStorage.setItem(PLAYER_TIME_KEY, JSON.stringify({ day: playerDay, phase: playerPhase })); }
+            const resetDeathModal = document.getElementById('resetDeathModal');
+            const resetDeathYes = document.getElementById('resetDeathYes');
+            const resetDeathNo = document.getElementById('resetDeathNo');
+            const resetHostBtn = document.getElementById('resetHostBtn');
+            const resetHostModal = document.getElementById('resetHostModal');
+            const resetHostYes = document.getElementById('resetHostYes');
+            const resetHostNo = document.getElementById('resetHostNo');
+
+            const SPELL_KEY = 'village_bewitched';
+            const bewitchedSet = new Set();
+            const NIGHT_ACTIONS_KEY = 'village_night_actions';
+            let nightActions = defaultNightActions();
+            let piperPending = [];
+            let vampParticipants = new Set();
+            let hunterPending = false;
+            let sheriffTransferPending = false;
+            let pendingSheriffTransferFrom = -1;
+            let sheriffTransfers = [];
+            let vampPendingTarget = -1;
+            const SHERIFF_TRANSFERS_KEY = 'village_sheriff_transfers';
+            function loadSheriffTransfers() { try { const arr = JSON.parse(localStorage.getItem(SHERIFF_TRANSFERS_KEY)); if (Array.isArray(arr)) return arr; } catch (e) {} return []; }
+            function saveSheriffTransfers() { localStorage.setItem(SHERIFF_TRANSFERS_KEY, JSON.stringify(sheriffTransfers)); }
+
+            function defaultNightActions() { return { piper: { day: 0, count: 0, targets: [] }, vampire: { day: 0, target: -1, participants: [], status: '' }, guardian: { night: 0, target: -1 }, witch: { poisonUsed: false, antidoteUsed: false, night: 0, lastAction: '' }, seer: { night: 0, checked: false, target: -1, faction: '' } }; }
+            function loadNightActions() { try { const d = JSON.parse(localStorage.getItem(NIGHT_ACTIONS_KEY)); if (d && typeof d === 'object') { const def = defaultNightActions(); return { piper: Object.assign({}, def.piper, d.piper), vampire: Object.assign({}, def.vampire, d.vampire), guardian: Object.assign({}, def.guardian, d.guardian), witch: Object.assign({}, def.witch, d.witch), seer: Object.assign({}, def.seer, d.seer) }; } } catch (e) {} return defaultNightActions(); }
+            function saveNightActions() { localStorage.setItem(NIGHT_ACTIONS_KEY, JSON.stringify(nightActions)); }
+            function loadBewitched() { try { const parsed = JSON.parse(localStorage.getItem(SPELL_KEY)); if (Array.isArray(parsed)) return new Set(parsed); } catch (e) {} return new Set(); }
+            function saveBewitched() { localStorage.setItem(SPELL_KEY, JSON.stringify(Array.from(bewitchedSet))); }
+            function getPiperIndex() { if (!currentRoles) return -1; for (let i = 0; i < currentRoles.length; i++) if (currentRoles[i] === '吹笛人') return i; return -1; }
+            function findRoleIndex(role) { if (!currentRoles) return -1; for (let i = 0; i < currentRoles.length; i++) if (currentRoles[i] === role) return i; return -1; }
+            function playerLabel(i) { const names = parsePlayerNames(playerNamesInput.value); return `${i + 1}号${names[i] ? `（${names[i]}）` : ''}`; }
+            function piperNightInfo() { const max = (gameDay % 2 === 1) ? 1 : 2; const used = (nightActions.piper.day === gameDay) ? nightActions.piper.count : 0; return { max: max, used: used, remaining: max - used }; }
+            function vampireIndices() { const r = []; if (currentRoles) for (let i = 0; i < 15; i++) if (currentRoles[i] === '吸血鬼') r.push(i); return r; }
+            function aliveTargetOptions(selected) { let opts = '<option value="">— 选择 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i)) continue; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${playerLabel(i)}</option>`; } return opts; }
+            function guardTargetOptions(prevTarget) { let opts = '<option value="">— 选择守护对象 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i) || i === prevTarget) continue; opts += `<option value="${i}">${playerLabel(i)}</option>`; } return opts; }
+            function piperTargetOptions() { const names = parsePlayerNames(playerNamesInput.value); const piper = getPiperIndex(); let opts = '<option value="">— 选择玩家 —</option>'; for (let i = 0; i < 15; i++) { if (i === piper || isDead(i) || bewitchedSet.has(i) || piperPending.indexOf(i) >= 0) continue; opts += `<option value="${i}">${i + 1}号${names[i] ? `（${names[i]}）` : ''}</option>`; } return opts; }
+            function seerFactionOf(role) { if (role === '吸血鬼') return '吸血鬼阵营'; if (role === '吹笛人') return '中立阵营（吹笛人）'; if (role === '普通村民') return '好人阵营（普通村民）'; return '好人阵营（神职）'; }
+            function resolveSeerTarget(input) { const s = String(input || '').trim(); if (!s) return -1; const m = s.match(/^(\d+)\s*号/); if (m) { const idx = parseInt(m[1], 10) - 1; if (idx >= 0 && idx < 15) return idx; } const names = parsePlayerNames(playerNamesInput.value); for (let i = 0; i < 15; i++) if (names[i] && names[i] === s) return i; return -1; }
+
+            function markDead(index, reason) {
+                if (isDead(index)) return true;
+                if (currentRoles && currentRoles[index] === '长老') {
+                    if (reason === REASON_VAMPIRE && elderLives === 2) { elderLives = 1; saveElderState(); return false; }
+                    if (reason !== REASON_VAMPIRE && !godsDisabled) { godsDisabled = true; saveElderState(); }
+                }
+                deadSet.add(index);
+                deathReasons[index] = reason;
+                deathTimes[index] = getGameTimeStamp();
+                saveDeadState();
+                if (currentRoles && currentRoles[index] === '猎人' && !godsDisabled) hunterPending = true;
+                if (voteSheriff === index) { sheriffTransferPending = true; pendingSheriffTransferFrom = index; }
+                if (index === coupleA && coupleB >= 0 && !isDead(coupleB)) markDead(coupleB, REASON_COUPLE);
+                else if (index === coupleB && coupleA >= 0 && !isDead(coupleA)) markDead(coupleA, REASON_COUPLE);
+                return true;
+            }
+
+            function finishDeathResolution() {
+                refreshGameViews();
+            }
+            function revivePlayer(index) {
+                if (!isDead(index)) return;
+                deadSet.delete(index);
+                delete deathReasons[index];
+                delete deathTimes[index];
+                if (currentRoles && currentRoles[index] === '长老') { elderLives = 2; godsDisabled = false; }
+                saveDeadState();
+                saveElderState();
+                refreshGameViews();
+            }
+            function resetAllDeaths() {
+                deadSet.clear();
+                for (const k in deathReasons) delete deathReasons[k];
+                for (const k in deathTimes) delete deathTimes[k];
+                elderLives = 2;
+                godsDisabled = false;
+                saveDeadState();
+                saveElderState();
+                refreshGameViews();
+            }
+            function doRevive() {
+                const sel = consolePanel.querySelector('.revive-select'); if (!sel) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
+                revivePlayer(idx);
+            }
+            function resetPiper() {
+                bewitchedSet.clear();
+                piperPending = [];
+                nightActions.piper = { day: 0, count: 0, targets: [] };
+                saveBewitched();
+                saveNightActions();
+                renderConsole();
+            }
+            function resetVampire() {
+                vampParticipants.clear();
+                vampPendingTarget = -1;
+                nightActions.vampire = { day: 0, target: -1, participants: [], status: '' };
+                saveNightActions();
+                renderConsole();
+            }
+            function resetWitch() {
+                nightActions.witch = { poisonUsed: false, antidoteUsed: false, night: 0, lastAction: '' };
+                saveNightActions();
+                renderConsole();
+            }
+            function resetSeer() {
+                nightActions.seer = { night: 0, checked: false, target: -1, faction: '' };
+                saveNightActions();
+                renderConsole();
+            }
+            function resetGuardian() {
+                nightActions.guardian = { night: 0, target: -1 };
+                saveNightActions();
+                renderConsole();
+            }
+            function guardConfirm() {
+                if (godsDisabled) return;
+                if (nightActions.guardian.night === gameDay) return;
+                const sel = consolePanel.querySelector('.guard-target'); if (!sel) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
+                if (nightActions.guardian.night === gameDay - 1 && nightActions.guardian.target === idx) return;
+                nightActions.guardian.night = gameDay;
+                nightActions.guardian.target = idx;
+                saveNightActions();
+                renderConsole();
+            }
+            function confirmCouple() {
+                if (coupleA < 0 || coupleB < 0 || coupleA === coupleB) return;
+                coupleLocked = true;
+                saveCouple();
+                renderConsole();
+            }
+            function resetCouple() {
+                coupleA = -1; coupleB = -1; coupleLocked = false;
+                saveCouple();
+                renderConsole();
+            }
+            function writeCoupleLog() {
+                if (coupleA < 0 || coupleB < 0) return;
+                appendAutoLog(`丘比特绑定情侣：${playerLabel(coupleA)} ↔ ${playerLabel(coupleB)}`);
+            }
+            function writeNightSummaryLog() {
+                const now = getGameTimeStamp();
+                const lines = [`【${now}总结】`];
+                const piperTargets = (nightActions.piper.day === gameDay) ? (nightActions.piper.targets || []) : [];
+                lines.push(`吹笛人施法：${piperTargets.length ? piperTargets.map(function(i) { return playerLabel(i); }).join('、') : '无'}`);
+                const vs = nightActions.vampire;
+                if (vs.day === gameDay && vs.target >= 0) {
+                    const parts = (vs.participants || []).map(function(i) { return playerLabel(i); }).join('、');
+                    let vt = `吸血鬼行动：击杀${playerLabel(vs.target)}` + (parts ? `（参与者：${parts}）` : '');
+                    if (vs.status === 'saved') vt += '，被女巫解药解救';
+                    else if (vs.status === 'protected') vt += '，被守护者保护';
+                    lines.push(vt);
+                } else lines.push('吸血鬼行动：无');
+                const g = nightActions.guardian;
+                lines.push(`守护者行动：${(g.night === gameDay && g.target >= 0) ? `守护${playerLabel(g.target)}` : '无'}`);
+                const s = nightActions.seer;
+                lines.push(`预言家行动：${(s.night === gameDay && s.checked) ? `查验${playerLabel(s.target)}（${s.faction}）` : '无'}`);
+                lines.push(`女巫行动：${nightActions.witch.lastAction || '无'}`);
+                const deadTonight = [];
+                for (const k in deathTimes) if (deathTimes[k] === now) deadTonight.push(parseInt(k, 10));
+                if (deadTonight.length) {
+                    lines.push('当晚死亡：');
+                    for (const i of deadTonight) { const role = currentRoles ? (currentRoles[i] || '未知') : '未知'; lines.push(`- ${playerLabel(i)} · ${role} · ${deathReason(i)}`); }
+                } else lines.push('当晚死亡：无');
+                appendAutoLog(lines.join('\n'));
+            }
+            function showAdvanceNightModal() {
+                advanceNightText.textContent = `是否进入第${chineseDay(gameDay + 1)}天白天？`;
+                advanceNightModal.classList.remove('hidden');
+            }
+            function advanceNightToDay() {
+                advanceNightModal.classList.add('hidden');
+                if (gamePhase !== '夜晚') return;
+                if (gameDay < 7) { gameDay += 1; gamePhase = '白天'; }
+                saveGameTime();
+                refreshGameViews();
+            }
+            function showAdvanceDayModal() {
+                advanceDayText.textContent = `是否进入第${chineseDay(gameDay)}天黑夜？`;
+                advanceDayModal.classList.remove('hidden');
+            }
+            function advanceDayToNight() {
+                advanceDayModal.classList.add('hidden');
+                if (gamePhase !== '白天') return;
+                writeDaySummary();
+                gamePhase = '夜晚';
+                saveGameTime();
+                refreshGameViews();
+            }
+            function writeDaySummary() {
+                const now = getGameTimeStamp();
+                const lines = [`【${now}总结】`];
+                const deaths = [];
+                for (const k in deathTimes) if (deathTimes[k] === now) deaths.push(parseInt(k, 10));
+                if (deaths.length) {
+                    lines.push('白天死亡：');
+                    for (const i of deaths) { const role = currentRoles ? (currentRoles[i] || '未知') : '未知'; lines.push(`- ${playerLabel(i)} · ${role} · ${deathReason(i)}`); }
+                } else lines.push('白天无死亡');
+                for (const t of sheriffTransfers) if (t.time === now) lines.push(`警长死亡：${playerLabel(t.from)} → 移交 ${playerLabel(t.to)}`);
+                appendAutoLog(lines.join('\n'));
+            }
+            function updatePhaseButtons() {
+                advanceDayBtn.disabled = (gamePhase !== '白天');
+            }
+            function resetHostBoard() {
+                const keys = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
+                for (const k of keys) localStorage.removeItem(k);
+                deadSet.clear();
+                for (const k in deathReasons) delete deathReasons[k];
+                for (const k in deathTimes) delete deathTimes[k];
+                elderLives = 2; godsDisabled = false;
+                coupleA = -1; coupleB = -1; coupleLocked = false;
+                bewitchedSet.clear();
+                piperPending = [];
+                nightActions = defaultNightActions();
+                vampParticipants = new Set();
+                hunterPending = false;
+                sheriffTransferPending = false;
+                pendingSheriffTransferFrom = -1;
+                sheriffTransfers = [];
+                vampPendingTarget = -1;
+                voteVotes = defaultVotes();
+                voteSheriff = -1;
+                gameDay = 1; gamePhase = '白天';
+                saveGameTime();
+                currentRoles = null;
+                isLocked = false;
+                setLocked(false);
+                playerNamesInput.value = '';
+                generateAssignment();
+                refreshGameViews();
+                renderVillageLogs();
+            }
+            function showHunterModal() {
+                let opts = '<option value="">— 选择击杀对象 —</option>';
+                for (let i = 0; i < 15; i++) { if (isDead(i)) continue; opts += `<option value="${i}">${playerLabel(i)}</option>`; }
+                hunterTargetSelect.innerHTML = opts;
+                hunterModal.classList.remove('hidden');
+            }
+            function hunterConfirmShot() {
+                const idx = parseInt(hunterTargetSelect.value, 10); if (isNaN(idx) || idx < 0) return;
+                hunterModal.classList.add('hidden');
+                hunterPending = false;
+                markDead(idx, REASON_HUNTER);
+                finishDeathResolution();
+            }
+            function showSheriffTransferModal() {
+                let opts = '<option value="">— 选择移交对象 —</option>';
+                for (let i = 0; i < 15; i++) { if (isDead(i)) continue; opts += `<option value="${i}">${playerLabel(i)}</option>`; }
+                sheriffTargetSelect.innerHTML = opts;
+                sheriffTransferModal.classList.remove('hidden');
+            }
+            function sheriffTransferConfirmShot() {
+                const idx = parseInt(sheriffTargetSelect.value, 10);
+                sheriffTransferModal.classList.add('hidden');
+                if (!isNaN(idx) && idx >= 0) {
+                    if (pendingSheriffTransferFrom >= 0) { sheriffTransfers.push({ from: pendingSheriffTransferFrom, to: idx, time: getGameTimeStamp() }); saveSheriffTransfers(); }
+                    voteSheriff = idx; saveVotes();
+                    pendingSheriffTransferFrom = -1;
+                    sheriffTransferPending = false;
+                }
+                renderVoteList(); renderConsole();
+            }
+            function sheriffTransferCancelShot() {
+                sheriffTransferModal.classList.add('hidden');
+                // 保持 pending 状态，稍后可再执行
+            }
+
+            function toggleBewitch(i) { if (bewitchedSet.has(i)) bewitchedSet.delete(i); else bewitchedSet.add(i); }
+            function piperAdd() { const sel = consolePanel.querySelector('.piper-target'); if (!sel) return; const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return; const info = piperNightInfo(); if (piperPending.length >= info.remaining) return; if (piperPending.indexOf(idx) >= 0) return; piperPending.push(idx); renderConsole(); }
+            function showPiperConfirm() { if (!piperPending.length) return; piperConfirmText.textContent = `确定选择 ${piperPending.map(function(i) { return playerLabel(i); }).join(' 与 ')} 为吹笛对象吗？`; piperConfirmModal.classList.remove('hidden'); }
+            function applyPiperPending() { for (const i of piperPending) bewitchedSet.add(i); nightActions.piper.day = gameDay; nightActions.piper.count += piperPending.length; nightActions.piper.targets = (nightActions.piper.targets || []).concat(piperPending); piperPending = []; saveBewitched(); saveNightActions(); renderConsole(); }
+
+            function showVampConfirm() {
+                const sel = consolePanel.querySelector('.vamp-target'); const target = parseInt(sel ? sel.value : '', 10);
+                if (isNaN(target) || target < 0) return;
+                const aliveVamps = vampireIndices().filter(function(v) { return !isDead(v); });
+                const minP = Math.ceil(aliveVamps.length / 2);
+                if (vampParticipants.size < minP) return;
+                vampPendingTarget = target;
+                vampConfirmText.textContent = `确认击杀 ${playerLabel(target)} 吗？参与者：${Array.from(vampParticipants).map(function(i) { return playerLabel(i); }).join('、')}（共 ${vampParticipants.size} 人）`;
+                vampConfirmModal.classList.remove('hidden');
+            }
+            function vampConfirmShot() {
+                vampConfirmModal.classList.add('hidden');
+                nightActions.vampire.day = gameDay;
+                nightActions.vampire.target = vampPendingTarget;
+                nightActions.vampire.participants = Array.from(vampParticipants);
+                nightActions.vampire.status = 'pending';
+                vampParticipants.clear();
+                saveNightActions();
+                renderConsole();
+            }
+            function resolveVampireKill() {
+                const vs = nightActions.vampire;
+                if (!(vs.day === gameDay && vs.status === 'pending')) return;
+                const g = nightActions.guardian;
+                if (g.night === gameDay && g.target === vs.target) {
+                    vs.status = 'protected';
+                } else {
+                    markDead(vs.target, REASON_VAMPIRE);
+                    vs.status = 'killed';
+                }
+                saveNightActions();
+                finishDeathResolution();
+            }
+            function witchAntidote() {
+                if (nightActions.witch.antidoteUsed || nightActions.witch.night === gameDay || godsDisabled) return;
+                const vs = nightActions.vampire;
+                if (!(vs.day === gameDay && vs.status === 'pending')) return;
+                const g = nightActions.guardian;
+                if (g.night === gameDay && g.target === vs.target) return; // 已被守护者保护，无需解药
+                if (currentRoles && currentRoles[vs.target] === '长老' && elderLives === 2) return; // 长老第一条命被击杀，女巫不知情，无法解药
+                nightActions.witch.antidoteUsed = true; nightActions.witch.night = gameDay;
+                nightActions.witch.lastAction = `使用解药解救 ${playerLabel(vs.target)}`;
+                vs.status = 'saved';
+                saveNightActions(); renderConsole();
+            }
+            function witchPoison() {
+                if (nightActions.witch.poisonUsed || nightActions.witch.night === gameDay || godsDisabled) return;
+                const sel = consolePanel.querySelector('.witch-poison-target'); if (!sel) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
+                nightActions.witch.poisonUsed = true; nightActions.witch.night = gameDay;
+                nightActions.witch.lastAction = `使用毒药毒杀 ${playerLabel(idx)}`;
+                markDead(idx, REASON_POISON);
+                const vs = nightActions.vampire;
+                if (vs.day === gameDay && vs.status === 'pending') {
+                    const g = nightActions.guardian;
+                    if (g.night === gameDay && g.target === vs.target) vs.status = 'protected';
+                    else { markDead(vs.target, REASON_VAMPIRE); vs.status = 'killed'; }
+                }
+                saveNightActions(); finishDeathResolution();
+            }
+            function seerCheck() {
+                if (nightActions.seer.night === gameDay && nightActions.seer.checked) return;
+                if (godsDisabled) return;
+                const input = consolePanel.querySelector('.seer-search');
+                const target = resolveSeerTarget(input ? input.value : '');
+                if (target < 0) { renderConsole(); return; }
+                if (target === findRoleIndex('预言家')) { renderConsole(); return; } // 预言家无法查验自己
+                const role = currentRoles ? currentRoles[target] : '';
+                nightActions.seer.night = gameDay; nightActions.seer.checked = true; nightActions.seer.target = target; nightActions.seer.faction = seerFactionOf(role);
+                saveNightActions(); renderConsole();
+            }
+
+            function coupleSelectOptions(selected, exclude) { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 未选择 —</option>'; for (let i = 0; i < 15; i++) { if (i === exclude) continue; const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } return opts; }
+            function dayOptions(selected) { let opts = ''; for (let d = 1; d <= 7; d++) opts += `<option value="${d}"${selected === d ? ' selected' : ''}>第${chineseDay(d)}天</option>`; return opts; }
+
+            function renderConsole() {
+                const names = parsePlayerNames(playerNamesInput.value);
+                const aliveCount = Array.from({ length: 15 }, function(_, i) { return i; }).filter(function(i) { return !isDead(i); }).length;
+                const piper = getPiperIndex();
+                const spellTargets = Array.from({ length: 15 }, function(_, i) { return i; }).filter(function(i) { return !isDead(i) && i !== piper; });
+                const bewitchedAlive = spellTargets.filter(function(i) { return bewitchedSet.has(i); }).length;
+                const coupleText = (coupleA >= 0 && coupleB >= 0) ? `${coupleA + 1}号 ↔ ${coupleB + 1}号` : '未指定';
+                const sheriffText = voteSheriff >= 0 ? `${voteSheriff + 1}号` : '未选出';
+                const piperCount = (gameDay % 2 === 1) ? 1 : 2;
+                const elderIdx = findRoleIndex('长老');
+                const isNight = (gamePhase === '夜晚');
+
+                let html = '';
+                html += '<div class="console-block"><div class="console-block-title">📊 汇总</div>';
+                html += '<div class="console-summary">' +
+                    `<div class="cs-item">存活：<b>${aliveCount}</b> / 15</div>` +
+                    `<div class="cs-item">情侣：<b>${coupleText}</b></div>` +
+                    `<div class="cs-item">警长：<b>${sheriffText}</b></div>` +
+                    `<div class="cs-item">已施法(存活)：<b>${bewitchedAlive}</b> 人</div></div>`;
+                if (elderIdx >= 0 && !isDead(elderIdx) && elderLives < 2) html += `<div class="notice-banner">👴 长老（${playerLabel(elderIdx)}）剩余生命：<b>${elderLives}</b> 条</div>`;
+                if (godsDisabled) html += '<div class="notice-banner warn">⚠️ 长老已死亡，所有神职（女巫、预言家、猎人、守护者、丘比特）技能失效</div>';
+                html += renderStatsHtml();
+                html += '</div>';
+
+                html += '<div class="console-block"><div class="console-block-title">⏳ 流程提醒</div>';
+                html += '<div class="flow-list">' +
+                    `<div class="flow-time-row">📅 游戏时间：<select class="console-day">${dayOptions(gameDay)}</select><select class="console-phase"><option value="白天"${gamePhase === '白天' ? ' selected' : ''}>白天</option><option value="夜晚"${gamePhase === '夜晚' ? ' selected' : ''}>夜晚</option></select><span class="game-time-value">第${chineseDay(gameDay)}天 · ${gamePhase}</span></div>` +
+                    `<div>🌙 夜晚行动顺序：吹笛人 → 吸血鬼 / 预言家 / 守护者 → 女巫</div>` +
+                    `<div>🪄 吹笛人今晚可施法 <b>${piperCount}</b> 人（${gameDay % 2 === 1 ? '奇数' : '偶数'}天）</div>` +
+                    `<div>🗳️ 第二天 12:00—14:00 为警长竞选时间</div></div></div>`;
+
+                html += '<div class="console-block"><div class="console-block-title">💘 丘比特指定情侣</div>';
+                if (coupleLocked) {
+                    html += `<div class="action-result">已绑定情侣：${coupleA >= 0 ? playerLabel(coupleA) : '未选'} ↔ ${coupleB >= 0 ? playerLabel(coupleB) : '未选'}（已锁定）</div>`;
+                    html += '<div class="action-select-row"><button class="log-couple-btn">📝 写入日志</button><button class="reset-couple-btn">🔄 重置</button></div>';
+                } else {
+                    html += '<div class="couple-bar"><select class="console-couple" data-slot="a">' + coupleSelectOptions(coupleA, coupleB) + '</select><span class="couple-heart">❤️</span><select class="console-couple" data-slot="b">' + coupleSelectOptions(coupleB, coupleA) + '</select></div>';
+                    html += '<div class="action-select-row"><button class="couple-confirm-btn"' + (coupleA >= 0 && coupleB >= 0 && coupleA !== coupleB ? '' : ' disabled') + '>💘 确认绑定</button><button class="reset-couple-btn">🔄 重置</button></div>';
+                }
+                html += '</div>';
+
+                html += '<div class="console-block"><div class="console-block-title">💀 死亡标记</div>';
+                html += '<div class="death-grid">';
+                for (let i = 0; i < 15; i++) {
+                    const role = currentRoles ? currentRoles[i] : '—'; const nm = names[i] || '—'; const dead = isDead(i); const reason = dead ? deathReason(i) : ''; const bw = bewitchedSet.has(i); const cp = (i === coupleA || i === coupleB);
+                    html += `<div class="death-cell${dead ? ' dead' : ''}"><div class="d-no">${i + 1}号</div><div class="d-name">${nm}${bw ? ' 🎶' : ''}${cp ? ' 💘' : ''}</div><div class="d-role">${role}</div><div class="d-tags">${dead ? `💀 ${reason}` : '✅ 存活'}</div></div>`;
+                }
+                html += '</div>';
+                let reviveOpts = '<option value="">— 选择死亡玩家 —</option>';
+                for (const i of Array.from(deadSet)) reviveOpts += `<option value="${i}">${playerLabel(i)}（${deathReason(i)}）</option>`;
+                html += '<div class="action-select-row"><select class="revive-select">' + reviveOpts + '</select><button class="revive-btn"' + (deadSet.size ? '' : ' disabled') + '>↩️ 撤销死亡</button><button class="reset-death-btn"' + (deadSet.size ? '' : ' disabled') + '>🔄 重置所有死亡</button></div>';
+                if (sheriffTransferPending) html += '<div class="action-select-row"><button class="manual-sheriff-btn">👑 警长未移交（点击移交）</button></div>';
+                if (hunterPending) html += '<div class="action-select-row"><button class="manual-hunter-btn">🔫 猎人未开枪（点击开枪）</button></div>';
+                html += '</div>';
+
+                // 吹笛人
+                const pi = piperNightInfo();
+                html += '<div class="console-block"><div class="console-block-title">🪄 吹笛人施法</div>';
+                const piperPlayer = findRoleIndex('吹笛人');
+                html += `<div class="action-info">吹笛人：${piperPlayer >= 0 ? playerLabel(piperPlayer) : '未分配'}</div>`;
+                html += `<div class="action-status">已吹奏且存活：<b>${bewitchedAlive}</b> / 场上存活：<b>${aliveCount}</b></div>`;
+                html += `<div class="action-status">今晚（第${chineseDay(gameDay)}天 · ${gameDay % 2 === 1 ? '奇数' : '偶数'}天）可施法 <b>${pi.max}</b> 人 · 本夜已施法 <b>${pi.used}</b> 人</div>`;
+                if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
+                else if (pi.remaining > 0) {
+                    html += '<div class="action-select-row"><select class="piper-target">' + piperTargetOptions() + '</select><button class="piper-add">➕ 添加</button></div>';
+                    if (piperPending.length) { html += `<div class="pending-list">待施法：${piperPending.map(function(i) { return playerLabel(i); }).join('、')}</div>`; html += '<div class="action-select-row"><button class="piper-confirm">🎺 确认施法</button></div>'; }
+                } else html += '<div class="action-limit">本夜施法已达上限，请推进游戏时间后继续</div>';
+                const bl = Array.from(bewitchedSet).map(function(i) { return playerLabel(i); }).join('、');
+                html += `<div class="action-result">已施法名单：${bl || '暂无'}</div>`;
+                html += '<div class="action-select-row"><button class="reset-piper-btn">🔄 重置吹笛操作</button></div></div>';
+
+                // 吸血鬼
+                const vamps = vampireIndices();
+                const aliveVamps = vamps.filter(function(v) { return !isDead(v); });
+                const minP = Math.ceil(aliveVamps.length / 2);
+                const vs = nightActions.vampire;
+                const vampIsTonight = vs.day === gameDay;
+                html += '<div class="console-block"><div class="console-block-title">🧛 吸血鬼行动</div>';
+                html += `<div class="action-info">吸血鬼（存活 ${aliveVamps.length} 人 / 共 ${vamps.length} 人）：${aliveVamps.map(function(i) { return playerLabel(i); }).join('、') || '无存活吸血鬼'}</div>`;
+                if (aliveVamps.length > 0) {
+                    html += `<div class="action-info">需至少 <b>${minP}</b> 人参与击杀（≥吸血鬼人数一半向上取整）</div>`;
+                    if (isNight) {
+                        html += '<div class="vamp-participants">';
+                        for (const v of aliveVamps) html += `<label class="vamp-participant"><input type="checkbox" class="vamp-part" data-index="${v}"${vampParticipants.has(v) ? ' checked' : ''}> ${playerLabel(v)}</label>`;
+                        html += '</div>';
+                        html += '<div class="action-select-row"><span>选择击杀：</span><select class="vamp-target">' + aliveTargetOptions(vs.target) + '</select><button class="vamp-confirm">🩸 确认击杀</button></div>';
+                    } else html += '<div class="action-limit">需切换至夜晚才能行动</div>';
+                    if (vampIsTonight && vs.status === 'pending') { html += `<div class="action-result">今晚已选择击杀 ${playerLabel(vs.target)}（参与者：${(vs.participants || []).map(function(i) { return playerLabel(i); }).join('、')}）· 待女巫决定是否解救</div>`; html += '<div class="action-select-row"><button class="vamp-resolve">⚖️ 女巫未解救，确认击杀生效</button></div>'; }
+                    else if (vampIsTonight && vs.status === 'saved') html += `<div class="action-result">今晚击杀 ${playerLabel(vs.target)} 已被女巫解药解救</div>`;
+                    else if (vampIsTonight && vs.status === 'protected') html += `<div class="action-result">今晚击杀 ${playerLabel(vs.target)} 已被守护者保护，未死亡</div>`;
+                    else if (vampIsTonight && vs.status === 'killed') html += `<div class="action-result">今晚已击杀 ${playerLabel(vs.target)}</div>`;
+                } else html += '<div class="action-result">无存活吸血鬼，无法行动</div>';
+                html += '<div class="action-select-row"><button class="reset-vamp-btn">🔄 重置吸血鬼操作</button></div>';
+                html += '</div>';
+
+                // 守护者
+                const g = nightActions.guardian;
+                const guardianIsTonight = (g.night === gameDay);
+                const guardianPrev = (g.night === gameDay - 1) ? g.target : -1;
+                html += '<div class="console-block"><div class="console-block-title">🛡️ 守护者行动</div>';
+                const guardianPlayer = findRoleIndex('守护者');
+                html += `<div class="action-info">守护者：${guardianPlayer >= 0 ? playerLabel(guardianPlayer) : '未分配'}</div>`;
+                html += '<div class="action-status">每晚守护一名角色（含自己），被守护者当晚免疫吸血鬼击杀；不得连续两晚守护同一人</div>';
+                if (godsDisabled) html += '<div class="action-limit">神职技能已失效</div>';
+                else if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
+                else html += '<div class="action-select-row"><select class="guard-target">' + guardTargetOptions(guardianPrev) + '</select><button class="guard-confirm"' + (guardianIsTonight ? ' disabled' : '') + '>🛡️ 确认守护</button></div>';
+                if (guardianIsTonight) html += `<div class="action-result">本夜守护：${playerLabel(g.target)}</div>`;
+                if (guardianPrev >= 0) html += `<div class="action-result">上一晚守护：${playerLabel(guardianPrev)}（今晚不可再守护）</div>`;
+                html += '<div class="action-select-row"><button class="reset-guard-btn">🔄 重置守护者操作</button></div></div>';
+
+                // 预言家
+                const s = nightActions.seer;
+                const seerCheckedTonight = (s.night === gameDay && s.checked);
+                html += '<div class="console-block"><div class="console-block-title">👁️ 预言家行动</div>';
+                const seerPlayer = findRoleIndex('预言家');
+                html += `<div class="action-info">预言家：${seerPlayer >= 0 ? playerLabel(seerPlayer) : '未分配'}</div>`;
+                html += `<div class="action-status">本夜已查验：${seerCheckedTonight ? '是' : '否'}</div>`;
+                if (godsDisabled) html += '<div class="action-limit">神职技能已失效</div>';
+                else if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
+                else html += '<div class="action-select-row"><input type="text" class="seer-search" list="seerDatalist" placeholder="输入姓名或序号搜索"><button class="seer-check"' + (seerCheckedTonight ? ' disabled' : '') + '>🔮 查验</button></div>';
+                html += '<datalist id="seerDatalist">';
+                for (let i = 0; i < 15; i++) { if (i === seerPlayer) continue; html += `<option value="${playerLabel(i)}">`; }
+                html += '</datalist>';
+                html += `<div class="action-result">查验结果：${s.faction ? `${playerLabel(s.target)} → ${s.faction}` : '尚未查验'}</div>`;
+                html += '<div class="action-select-row"><button class="reset-seer-btn">🔄 重置预言家操作</button></div></div>';
+
+                // 女巫
+                const w = nightActions.witch;
+                const witchActedTonight = (w.night === gameDay);
+                const antidoteTarget = (vampIsTonight && vs.status === 'pending') ? vs.target : -1;
+                const guardianProtectedTarget = (g.night === gameDay && antidoteTarget >= 0 && g.target === antidoteTarget);
+                const canAntidote = isNight && !w.antidoteUsed && !witchActedTonight && antidoteTarget >= 0 && !godsDisabled && !guardianProtectedTarget && !(currentRoles && currentRoles[antidoteTarget] === '长老' && elderLives === 2);
+                const canPoison = isNight && !w.poisonUsed && !witchActedTonight && !godsDisabled;
+                html += '<div class="console-block"><div class="console-block-title">🧙 女巫行动</div>';
+                const witchPlayer = findRoleIndex('女巫');
+                html += `<div class="action-info">女巫：${witchPlayer >= 0 ? playerLabel(witchPlayer) : '未分配'}</div>`;
+                html += `<div class="action-status">解药：${w.antidoteUsed ? '已使用' : '未使用'} · 毒药：${w.poisonUsed ? '已使用' : '未使用'}</div>`;
+                html += '<div class="action-select-row"><button class="witch-antidote"' + (canAntidote ? '' : ' disabled') + '>💊 使用解药（解救 ' + (antidoteTarget >= 0 ? playerLabel(antidoteTarget) : '吸血鬼击杀目标') + '）</button></div>';
+                if (guardianProtectedTarget) html += '<div class="action-limit">被守护者保护的目标无需解药</div>';
+                html += '<div class="action-select-row"><select class="witch-poison-target"' + (canPoison ? '' : ' disabled') + '>' + aliveTargetOptions() + '</select><button class="witch-poison"' + (canPoison ? '' : ' disabled') + '>☠️ 使用毒药</button></div>';
+                html += `<div class="action-result">最近行动：${w.lastAction || '无'}</div>`;
+                if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
+                html += '<div class="action-select-row"><button class="night-summary-btn">📝 一键写入整夜总结</button><button class="reset-witch-btn">🔄 重置女巫操作</button></div>';
+                if (isNight) html += '<div class="action-select-row"><button class="advance-night-btn"' + (gameDay >= 7 ? ' disabled' : '') + '>🌅 进入下一阶段</button></div>';
+                html += '</div>';
+
+                consolePanel.innerHTML = html;
+            }
+
+            function renderPlayerConsole() {
+                const names = parsePlayerNames(playerNamesInput.value);
+                let html = '<div class="flow-time-row">📅 游戏时间：' +
+                    `<select class="player-day">${dayOptions(playerDay)}</select>` +
+                    `<select class="player-phase"><option value="白天"${playerPhase === '白天' ? ' selected' : ''}>白天</option><option value="夜晚"${playerPhase === '夜晚' ? ' selected' : ''}>夜晚</option></select>` +
+                    `<span class="game-time-value">${getPlayerTimeStamp()}</span>` +
+                    '</div>';
+                html += '<div class="death-grid">';
+                for (let i = 0; i < 15; i++) {
+                    const nm = names[i] || '—';
+                    const pd = publicDeaths[i];
+                    html += `<div class="death-cell${pd ? ' dead' : ''}">` +
+                        `<div class="d-no">${i + 1}号</div><div class="d-name">${nm}</div>`;
+                    if (pd) {
+                        html += `<div class="d-tags">💀 ${pd.reason} · ${pd.time}</div>` +
+                            `<div class="d-role">身份：${pd.revealedRole || '未公布'}</div>` +
+                            `<select class="player-reveal" data-index="${i}"><option value="">— 公布身份 —</option>${roleOptions(pd.revealedRole)}</select>`;
+                    } else {
+                        html += `<div class="d-tags">✅ 存活</div>` +
+                            `<button class="player-death-btn" data-index="${i}">💀 死亡</button>`;
+                    }
+                    html += '</div>';
+                }
+                html += '</div>';
+                playerViewPanel.innerHTML = html;
+            }
+
+            consolePanel.addEventListener('click', function(e) {
+                const btn = e.target.closest('button'); if (!btn) return;
+                if (btn.classList.contains('piper-add')) piperAdd();
+                else if (btn.classList.contains('piper-confirm')) showPiperConfirm();
+                else if (btn.classList.contains('vamp-confirm')) showVampConfirm();
+                else if (btn.classList.contains('vamp-resolve')) resolveVampireKill();
+                else if (btn.classList.contains('witch-antidote')) witchAntidote();
+                else if (btn.classList.contains('witch-poison')) witchPoison();
+                else if (btn.classList.contains('seer-check')) seerCheck();
+                else if (btn.classList.contains('revive-btn')) doRevive();
+                else if (btn.classList.contains('reset-death-btn')) { resetDeathModal.classList.remove('hidden'); }
+                else if (btn.classList.contains('reset-piper-btn')) resetPiper();
+                else if (btn.classList.contains('reset-vamp-btn')) resetVampire();
+                else if (btn.classList.contains('reset-witch-btn')) resetWitch();
+                else if (btn.classList.contains('reset-seer-btn')) resetSeer();
+                else if (btn.classList.contains('guard-confirm')) guardConfirm();
+                else if (btn.classList.contains('reset-guard-btn')) resetGuardian();
+                else if (btn.classList.contains('couple-confirm-btn')) confirmCouple();
+                else if (btn.classList.contains('reset-couple-btn')) resetCouple();
+                else if (btn.classList.contains('log-couple-btn')) writeCoupleLog();
+                else if (btn.classList.contains('night-summary-btn')) writeNightSummaryLog();
+                else if (btn.classList.contains('advance-night-btn')) showAdvanceNightModal();
+                else if (btn.classList.contains('manual-sheriff-btn')) showSheriffTransferModal();
+                else if (btn.classList.contains('manual-hunter-btn')) showHunterModal();
+            });
+
+            consolePanel.addEventListener('change', function(e) {
+                if (e.target.classList.contains('console-couple')) {
+                    const slot = e.target.getAttribute('data-slot'); const val = e.target.value === '' ? -1 : parseInt(e.target.value, 10);
+                    if (slot === 'a') { coupleA = val; if (coupleA >= 0 && coupleA === coupleB) coupleB = -1; } else { coupleB = val; if (coupleB >= 0 && coupleB === coupleA) coupleA = -1; }
+                    saveCouple(); renderConsole();
+                } else if (e.target.classList.contains('console-day')) { gameDay = parseInt(e.target.value, 10); saveGameTime(); refreshGameViews(); }
+                else if (e.target.classList.contains('console-phase')) { gamePhase = e.target.value; saveGameTime(); refreshGameViews(); }
+                else if (e.target.classList.contains('vamp-part')) { const idx = parseInt(e.target.getAttribute('data-index'), 10); if (e.target.checked) vampParticipants.add(idx); else vampParticipants.delete(idx); renderConsole(); }
+            });
+
+            piperConfirmYes.addEventListener('click', function() { piperConfirmModal.classList.add('hidden'); applyPiperPending(); });
+            piperConfirmNo.addEventListener('click', function() { piperConfirmModal.classList.add('hidden'); });
+            piperConfirmModal.addEventListener('click', function(e) { if (e.target === piperConfirmModal) piperConfirmModal.classList.add('hidden'); });
+            vampConfirmYes.addEventListener('click', vampConfirmShot);
+            vampConfirmNo.addEventListener('click', function() { vampConfirmModal.classList.add('hidden'); });
+            vampConfirmModal.addEventListener('click', function(e) { if (e.target === vampConfirmModal) vampConfirmModal.classList.add('hidden'); });
+            hunterConfirm.addEventListener('click', hunterConfirmShot);
+            hunterCancel.addEventListener('click', function() { hunterModal.classList.add('hidden'); });
+            hunterModal.addEventListener('click', function(e) { if (e.target === hunterModal) hunterModal.classList.add('hidden'); });
+            sheriffTransferConfirm.addEventListener('click', sheriffTransferConfirmShot);
+            sheriffTransferCancel.addEventListener('click', sheriffTransferCancelShot);
+            sheriffTransferModal.addEventListener('click', function(e) { if (e.target === sheriffTransferModal) sheriffTransferModal.classList.add('hidden'); });
+            advanceNightYes.addEventListener('click', advanceNightToDay);
+            advanceNightNo.addEventListener('click', function() { advanceNightModal.classList.add('hidden'); });
+            advanceNightModal.addEventListener('click', function(e) { if (e.target === advanceNightModal) advanceNightModal.classList.add('hidden'); });
+            advanceDayYes.addEventListener('click', advanceDayToNight);
+            advanceDayNo.addEventListener('click', function() { advanceDayModal.classList.add('hidden'); });
+            advanceDayModal.addEventListener('click', function(e) { if (e.target === advanceDayModal) advanceDayModal.classList.add('hidden'); });
+            advanceDayBtn.addEventListener('click', showAdvanceDayModal);
+            playerViewPanel.addEventListener('click', function(e) {
+                const btn = e.target.closest('.player-death-btn');
+                if (!btn) return;
+                pendingPlayerDeathIndex = parseInt(btn.getAttribute('data-index'), 10);
+                playerDeathReason.value = '投票处决';
+                playerDeathModal.classList.remove('hidden');
+            });
+            playerViewPanel.addEventListener('change', function(e) {
+                if (e.target.classList.contains('player-reveal')) {
+                    const idx = parseInt(e.target.getAttribute('data-index'), 10);
+                    if (publicDeaths[idx]) { publicDeaths[idx].revealedRole = e.target.value; savePublicDeaths(); renderPlayerConsole(); }
+                } else if (e.target.classList.contains('player-day')) {
+                    playerDay = parseInt(e.target.value, 10); savePlayerTime(); renderPlayerConsole();
+                } else if (e.target.classList.contains('player-phase')) {
+                    playerPhase = e.target.value; savePlayerTime(); renderPlayerConsole();
                 }
             });
+            playerDeathConfirm.addEventListener('click', function() {
+                playerDeathModal.classList.add('hidden');
+                if (pendingPlayerDeathIndex >= 0) {
+                    publicDeaths[pendingPlayerDeathIndex] = { reason: playerDeathReason.value, time: getPlayerTimeStamp(), revealedRole: '' };
+                    savePublicDeaths();
+                }
+                pendingPlayerDeathIndex = -1;
+                renderPlayerConsole();
+            });
+            playerDeathCancel.addEventListener('click', function() { playerDeathModal.classList.add('hidden'); pendingPlayerDeathIndex = -1; });
+            playerDeathModal.addEventListener('click', function(e) { if (e.target === playerDeathModal) playerDeathModal.classList.add('hidden'); });
+            resetDeathYes.addEventListener('click', function() { resetDeathModal.classList.add('hidden'); resetAllDeaths(); });
+            resetDeathNo.addEventListener('click', function() { resetDeathModal.classList.add('hidden'); });
+            resetDeathModal.addEventListener('click', function(e) { if (e.target === resetDeathModal) resetDeathModal.classList.add('hidden'); });
+            resetHostBtn.addEventListener('click', function() { resetHostModal.classList.remove('hidden'); });
+            resetHostYes.addEventListener('click', function() { resetHostModal.classList.add('hidden'); resetHostBoard(); });
+            resetHostNo.addEventListener('click', function() { resetHostModal.classList.add('hidden'); });
+            resetHostModal.addEventListener('click', function(e) { if (e.target === resetHostModal) resetHostModal.classList.add('hidden'); });
+
+            (function initNightState() {
+                nightActions = loadNightActions();
+                const loaded = loadBewitched(); bewitchedSet.clear(); loaded.forEach(function(i) { bewitchedSet.add(i); });
+                const piper = getPiperIndex(); if (piper >= 0) bewitchedSet.delete(piper);
+                sheriffTransfers = loadSheriffTransfers();
+                publicDeaths = loadPublicDeaths();
+                loadPlayerTime();
+            })();
+
+            // ================= 主持人：骰子工具 =================
+            const diceResultDiv = document.getElementById('diceResult');
+            const diceModifierInput = document.getElementById('diceModifier');
+            const diceBtns = Array.from(document.querySelectorAll('.dice-btn'));
+            diceBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const faces = parseInt(btn.getAttribute('data-faces'), 10);
+                    let mod = parseInt(diceModifierInput.value, 10);
+                    if (isNaN(mod)) mod = 0;
+                    mod = Math.max(0, Math.min(100, mod));
+                    const roll = Math.floor(Math.random() * faces) + 1;
+                    const total = roll + mod;
+                    diceResultDiv.innerHTML = mod > 0 ? `🎲 1d${faces} + ${mod} = ${roll} + ${mod} = <b>${total}</b>` : `🎲 1d${faces} = <b>${roll}</b>`;
+                });
+            });
+
+            // ================= 统一刷新 =================
+            function refreshGameViews() { renderAssignment(); renderVoteList(); renderConsole(); renderPlayerConsole(); updatePhaseButtons(); }
+            playerNamesInput.addEventListener('input', refreshGameViews);
+            renderConsole();
+            renderPlayerConsole();
+            updatePhaseButtons();
+            showView('menuView');
+
+            const startYear = 2025;
+            const nowYear = new Date().getFullYear();
+            document.getElementById('yearText').textContent = nowYear > startYear ? `${startYear}-${nowYear}` : String(startYear);
         })();
     </script>
 </body>
