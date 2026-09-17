@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鬼村神秘小工具3.0</title>
+    <title>鬼村神秘小工具3.1</title>
     <style>
         * { box-sizing: border-box; }
         [hidden] { display: none !important; }
@@ -94,7 +94,7 @@
         .vote-none { color: #9a93b5; font-style: italic; }
         .exec-btn { margin-top: 8px; background: rgba(255,90,110,0.2); border-color: rgba(255,90,110,0.6); }
         .console-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
-        .console-block { margin-bottom: 16px; }
+        .console-block { margin-bottom: 16px; scroll-margin-top: 78px; }
         .console-block:last-child { margin-bottom: 0; }
         .console-block-title { font-weight: bold; color: #f3efff; margin-bottom: 8px; }
         .console-summary { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 12px; border-radius: 10px; background: rgba(160,107,255,0.1); border: 1px solid rgba(160,107,255,0.3); margin-bottom: 10px; }
@@ -138,6 +138,51 @@
         .modal p { color: #e8e6f0; margin: 0 0 16px; }
         .modal select { width: 100%; margin: 0 0 16px; }
         .modal-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .settle-btn { margin: 0; flex-shrink: 0; background: rgba(60,255,180,0.14); border-color: rgba(80,255,190,0.5); }
+        .settle-modal { max-width: 780px; text-align: left; }
+        .settle-title { font-weight: bold; font-size: 1.15rem; margin-bottom: 10px; }
+        .settle-summary { font-size: 0.95rem; color: #e6dcff; margin-bottom: 10px; line-height: 1.75; }
+        .settle-summary .ok { color: #7dffb0; font-weight: bold; }
+        .settle-summary .no { color: #9a93b5; }
+        #settleExport { width: 100%; font-family: Consolas, "Courier New", monospace; font-size: 13px; line-height: 1.5; }
+        .progress-wrap { position: relative; height: 20px; border-radius: 10px; background: rgba(0,0,0,0.35); border: 1px solid rgba(160,120,255,0.35); overflow: hidden; margin: 6px 0 10px; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #a06bff, #00f0ff); transition: width .3s ease; }
+        .progress-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #eef; text-shadow: 0 0 6px rgba(0,0,0,0.85); }
+        .ref-section { border: 1px solid rgba(160,120,255,0.28); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px; background: rgba(255,255,255,0.04); }
+        .ref-section summary { cursor: pointer; font-size: 1.15rem; font-weight: bold; color: #f3efff; text-shadow: 0 0 10px rgba(160,107,255,0.5); }
+        .ref-table { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .ref-row { padding: 7px 10px; border-radius: 8px; background: rgba(0,0,0,0.18); font-size: 0.92rem; }
+        .ref-name { color: #d7fbff; font-weight: bold; }
+        .ref-note { color: #9a93b5; font-size: 0.86rem; display: block; margin-top: 2px; }
+        .ref-tip { color: #9a93b5; font-size: 0.88rem; margin-top: 10px; line-height: 1.7; }
+        .console-block-title.foldable { cursor: pointer; user-select: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .console-block-title.foldable:hover { color: #00f0ff; }
+        .fold-icon { font-size: 0.9rem; color: #9a93b5; }
+        .toast-bar { position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 20px); max-width: 88vw; padding: 10px 18px; border-radius: 10px; background: rgba(30,20,60,0.97); border: 1px solid rgba(0,240,255,0.5); color: #e8f6ff; font-size: 0.95rem; box-shadow: 0 8px 28px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease; z-index: 200; }
+        .toast-bar.show { opacity: 1; transform: translate(-50%, 0); }
+        .step-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .step-chip { font-size: 0.88rem; padding: 6px 11px; border-radius: 999px; border: 1px solid rgba(160,120,255,0.45); background: rgba(0,0,0,0.25); color: #d9d3ee; cursor: pointer; }
+        .step-chip:hover { border-color: #00f0ff; color: #eafcff; }
+        .step-chip.done { border-color: rgba(90,255,180,0.6); color: #b6ffd8; background: rgba(60,255,180,0.12); }
+        .step-chip.todo { border-color: rgba(255,180,80,0.55); color: #ffd9a0; }
+        .step-chip.skip { opacity: 0.45; cursor: default; }
+        .dice-history { margin-top: 8px; font-size: 0.86rem; color: #b9b3d0; display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+        .dice-history div { border-bottom: 1px dotted rgba(170,170,170,0.25); padding-bottom: 2px; }
+        .log-edit { font-size: 0.85rem; padding: 4px 8px; white-space: nowrap; background: rgba(160,107,255,0.18); border-color: rgba(160,120,255,0.5); }
+        .log-text[contenteditable="true"] { outline: 1px dashed rgba(0,240,255,0.6); border-radius: 6px; padding: 2px 6px; background: rgba(0,0,0,0.25); }
+        .undo-hint { font-size: 0.86rem; color: #9a93b5; margin-top: 6px; }
+        .board-head.sticky-head { position: sticky; top: 0; z-index: 30; padding: 10px 0; background: linear-gradient(180deg, rgba(11,10,24,0.97) 60%, rgba(11,10,24,0)); backdrop-filter: blur(6px); }
+        @media (max-width: 640px) {
+            button { padding: 10px 14px; font-size: 15px; }
+            select, input { padding: 10px 10px; min-height: 42px; }
+            .death-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (min-width: 1180px) {
+            .content-wrap { max-width: 1180px; }
+            #consolePanel { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
+            #consolePanel .console-block:nth-child(1) { grid-column: 1 / -1; }
+            #consolePanel .console-block:nth-child(2) { grid-column: 1 / -1; }
+        }
         footer { margin-top: 30px; text-align: center; color: #8a8a9a; font-size: 0.9em; }
     </style>
 </head>
@@ -145,7 +190,7 @@
     <div class="ghost-bg" aria-hidden="true"><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span></div>
     <div class="content-wrap">
         <div id="menuView" class="view">
-            <h1 class="site-title">👻 鬼村神秘小工具 3.0</h1>
+            <h1 class="site-title">👻 鬼村神秘小工具 3.1</h1>
             <p class="menu-subtitle">请选择要进入的板块</p>
             <div class="menu">
                 <button class="menu-btn" data-view="funBoardView">🎮 娱乐功能</button>
@@ -164,11 +209,13 @@
         </div>
 
         <div id="hostBoardView" class="view" hidden>
-            <div class="board-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🖥️ 主持人板块</h2><button id="resetHostBtn" class="reset-host-btn">🔄 重置所有内容</button></div>
+            <div class="board-head sticky-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🖥️ 主持人板块</h2><button id="undoBtn" class="undo-btn" disabled>↩️ 撤销上一步</button><button id="settleBtn" class="settle-btn">🏁 结算与导出</button><button id="resetHostBtn" class="reset-host-btn">🔄 重置所有内容</button></div>
+            <div id="undoHint" class="undo-hint">暂无可撤销的操作</div>
             <div class="section">
                 <h3>🆔 15人身份分配</h3>
                 <p><strong>配置：</strong> 4普通村民 · 4吸血鬼 · 长老 · 预言家 · 女巫 · 守护者 · 猎人 · 丘比特 · 吹笛人</p>
                 <label>玩家姓名: <input type="text" id="playerNames" placeholder="按座位顺序输入15位玩家姓名，用空格或逗号分隔"></label>
+                <div id="nameCount" class="assignment-tip">已识别 0 / 15 位玩家</div>
                 <div class="btn-row">
                     <button id="assignBtn">🎲 随机分配身份</button>
                     <button id="saveAssignBtn">💾 保存分配</button>
@@ -215,9 +262,28 @@
                     <button class="dice-btn" data-faces="18">1d18</button>
                     <span>+</span>
                     <input type="number" id="diceModifier" min="0" max="100" value="0" style="width: 80px;">
+                    <button id="clueCountBtn">🔍 线索条数（1d2+3）</button>
                 </div>
                 <div id="diceResult" class="result">—</div>
+                <div id="diceHistory" class="dice-history"></div>
+                <div class="console-block" style="margin-top:16px;">
+                    <div class="console-block-title">⚔️ 吸血鬼反击判定</div>
+                    <p class="game-time-note">反击流程：参与击杀的每名吸血鬼各掷 1d6 并将点数相加；确认死亡（未被守护者守护、未被女巫解药救治）的受害者掷 1d（行动吸血鬼人数 × 6）。若吸血鬼总点数 &lt; 受害者点数，则反击成功 —— 受害者必定留下一条反击线索，同时增加一条吸血鬼线索。</p>
+                    <div id="counterHint" class="action-limit"></div>
+                    <div class="action-select-row">
+                        <label>参与行动的吸血鬼人数：<input type="number" id="counterVampCount" min="1" max="15" value="1" style="width: 80px;"></label>
+                        <button id="counterAutoBtn">⚔️ 一键判定（自动掷骰）</button>
+                    </div>
+                    <div id="counterResult" class="result">—</div>
+                    <div class="action-select-row">
+                        <label>手动录入 · 吸血鬼合计：<input type="number" id="counterVampTotal" min="0" value="0" style="width: 80px;"></label>
+                        <label>受害者点数：<input type="number" id="counterVictimTotal" min="0" value="0" style="width: 80px;"></label>
+                        <button id="counterManualBtn">⚖️ 手动判定</button>
+                        <button id="counterLogBtn" hidden>📝 写入村中日志</button>
+                    </div>
+                </div>
             </div>
+            <div id="hostMagicRef"></div>
         </div>
 
         <div id="playerBoardView" class="view" hidden>
@@ -225,13 +291,16 @@
             <div class="section">
                 <h3>🔮 玩家推测</h3>
                 <p class="guess-note">根据玩家姓名推测每个人的阵营；选择「神职」可指定具体身份，「中立」即吹笛人。</p>
+                <button id="resetGuessesBtn">🔄 重置推测</button>
                 <div id="guessList" class="guess-list"></div>
             </div>
             <div class="section">
                 <h3>👥 玩家视图</h3>
                 <p class="console-note">玩家视角：仅显示姓名、序号与存活状态。</p>
+                <button id="resetPublicDeathsBtn">🔄 重置死亡记录</button>
                 <div id="playerViewPanel" class="console-panel"></div>
             </div>
+            <div id="playerMagicRef"></div>
         </div>
     </div>
 
@@ -243,6 +312,9 @@
     </div>
     <div id="vampConfirmModal" class="modal-overlay hidden">
         <div class="modal"><p id="vampConfirmText">确认击杀吗？</p><div class="modal-actions"><button id="vampConfirmYes">🩸 确认击杀</button><button id="vampConfirmNo">取消</button></div></div>
+    </div>
+    <div id="suicideConfirmModal" class="modal-overlay hidden">
+        <div class="modal"><p id="suicideConfirmText">确认自杀吗？</p><div class="modal-actions"><button id="suicideConfirmYes">🗡️ 确认自杀</button><button id="suicideConfirmNo">取消</button></div></div>
     </div>
     <div id="hunterModal" class="modal-overlay hidden">
         <div class="modal"><p id="hunterText">🔫 猎人已死亡，请选择开枪击杀对象</p><select id="hunterTargetSelect"></select><div class="modal-actions"><button id="hunterConfirm">🔫 确认开枪</button><button id="hunterCancel">取消</button></div></div>
@@ -257,10 +329,28 @@
         <div class="modal"><p id="advanceDayText">是否进入下一阶段？</p><div class="modal-actions"><button id="advanceDayYes">🌙 确认</button><button id="advanceDayNo">取消</button></div></div>
     </div>
     <div id="playerDeathModal" class="modal-overlay hidden">
-        <div class="modal"><p>选择死亡原因</p><select id="playerDeathReason"><option>投票处决</option><option>吸血鬼击杀</option><option>女巫毒杀</option><option>猎人开枪击杀</option><option>情侣殉情</option></select><div class="modal-actions"><button id="playerDeathConfirm">💀 确认死亡</button><button id="playerDeathCancel">取消</button></div></div>
+        <div class="modal"><p>选择死亡原因</p><select id="playerDeathReason"><option>投票处决</option><option>吸血鬼击杀</option><option>女巫毒杀</option><option>猎人开枪击杀</option><option>情侣殉情</option><option>吸血鬼自杀</option></select><div class="modal-actions"><button id="playerDeathConfirm">💀 确认死亡</button><button id="playerDeathCancel">取消</button></div></div>
     </div>
     <div id="resetDeathModal" class="modal-overlay hidden">
         <div class="modal"><p>🔄 确定要重置所有玩家的死亡状态吗？<br>（将复活所有玩家，并恢复长老生命与神职技能）</p><div class="modal-actions"><button id="resetDeathYes">🔄 确认重置</button><button id="resetDeathNo">取消</button></div></div>
+    </div>
+    <div id="actionConfirmModal" class="modal-overlay hidden">
+        <div class="modal"><p id="actionConfirmText">确定执行此操作吗？</p><div class="modal-actions"><button id="actionConfirmYes">✅ 确认执行</button><button id="actionConfirmNo">取消</button></div></div>
+    </div>
+    <div id="settleModal" class="modal-overlay hidden">
+        <div class="modal settle-modal">
+            <p class="settle-title">🏁 结算摘要</p>
+            <div id="settleSummary" class="settle-summary"></div>
+            <textarea id="settleExport" rows="14" readonly spellcheck="false"></textarea>
+            <div class="modal-actions">
+                <button id="settleDownload">📥 下载记录文件</button>
+                <button id="settleCopy">📋 复制全文</button>
+                <button id="settleClose">关闭</button>
+            </div>
+        </div>
+    </div>
+    <div id="elderReviveModal" class="modal-overlay hidden">
+        <div class="modal"><p id="elderReviveText">长老生命值提示</p><div class="modal-actions"><button id="elderReviveYes">✅ 按规则复原并撤销死亡</button><button id="elderReviveNo">取消</button></div></div>
     </div>
     <div id="resetHostModal" class="modal-overlay hidden">
         <div class="modal"><p>🔄 确定要重置主持人板块的所有内容吗？<br>（将清空身份分配、死亡、情侣、夜晚行动、投票、日志与游戏时间）</p><div class="modal-actions"><button id="resetHostYes">🔄 确认重置</button><button id="resetHostNo">取消</button></div></div>
@@ -297,6 +387,12 @@
             const REASON_POISON = '女巫毒药毒杀';
             const REASON_HUNTER = '猎人开枪击杀';
             const REASON_COUPLE = '情侣殉情';
+            const REASON_SUICIDE = '吸血鬼自杀';
+            // 规则书：长老被女巫毒杀、猎人猎杀、投票处决时立刻死亡（无论拥有几次生命），
+            // 且神职的所有特殊能力消失（神职身份保留）。此效果不可通过「撤销死亡」抹除。
+            const ELDER_FATAL_REASONS = [REASON_VOTE, REASON_POISON, REASON_HUNTER];
+            function isElderFatalReason(reason) { return ELDER_FATAL_REASONS.indexOf(reason) >= 0; }
+            function isElderRole(i) { return !!(currentRoles && currentRoles[i] === '长老'); }
 
             function isDead(i) { return deadSet.has(i); }
             function deathReason(i) { return deathReasons[i] || ''; }
@@ -361,6 +457,12 @@
                 html += '</div>';
                 html += `<div class="assignment-tip">${isLocked ? '🔒 分配已保存并锁定' : '💡 点击「保存分配」可锁定当前角色，防止刷新后重新分配'}</div>`;
                 assignmentDiv.innerHTML = html;
+                const nc = document.getElementById('nameCount');
+                if (nc) {
+                    const n = playerNamesArr.length;
+                    nc.textContent = `已识别 ${n} / 15 位玩家` + (n === 15 ? ' ✅ 人数已齐' : (n ? '（不足 15 人时未命名的座位只显示序号）' : '（请输入玩家姓名，用空格或逗号分隔）'));
+                    nc.style.color = n === 15 ? '#7dffb0' : '#ffb74d';
+                }
             }
             function renderStatsHtml() {
                 let v = 0, va = 0, mp = 0, mpa = 0, g = 0, ga = 0;
@@ -415,11 +517,12 @@
             const confirmNo = document.getElementById('confirmNo');
             const VILLAGE_LOG_KEY = 'village_log';
             const GAME_TIME_KEY = 'village_game_time';
-            const DAY_NAMES = ['一','二','三','四','五','六','七'];
+            const MAX_DAY = 20;
+            const DAY_NAMES = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十'];
             let gameDay = 1;
             let gamePhase = '白天';
-            function chineseDay(n) { return DAY_NAMES[n - 1]; }
-            function loadGameTime() { try { const data = JSON.parse(localStorage.getItem(GAME_TIME_KEY)); if (data && typeof data.day === 'number' && (data.phase === '白天' || data.phase === '夜晚')) { gameDay = Math.min(7, Math.max(1, data.day)); gamePhase = data.phase; } } catch (e) {} }
+            function chineseDay(n) { return DAY_NAMES[n - 1] || String(n); }
+            function loadGameTime() { try { const data = JSON.parse(localStorage.getItem(GAME_TIME_KEY)); if (data && typeof data.day === 'number' && (data.phase === '白天' || data.phase === '夜晚')) { gameDay = Math.min(MAX_DAY, Math.max(1, data.day)); gamePhase = data.phase; } } catch (e) {} }
             function saveGameTime() { localStorage.setItem(GAME_TIME_KEY, JSON.stringify({ day: gameDay, phase: gamePhase })); }
             function getGameTimeStamp() { return `第${chineseDay(gameDay)}天${gamePhase}`; }
             function makeLogId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -431,17 +534,49 @@
                 if (!logs.length) { logList.innerHTML = '<div class="log-empty">🌙 夜深了，还没有任何记录...</div>'; clearLogBtn.style.display = 'none'; return; }
                 clearLogBtn.style.display = '';
                 let html = '';
-                for (const log of [...logs].reverse()) html += `<div class="log-entry" data-id="${log.id}"><span class="log-time">${log.time}</span><span class="log-text">${escapeLogHtml(log.text)}</span><button class="log-del" data-id="${log.id}">❌ 删除</button></div>`;
+                for (const log of [...logs].reverse()) html += `<div class="log-entry" data-id="${log.id}"><span class="log-time">${log.time}</span><span class="log-text">${escapeLogHtml(log.text)}</span><button class="log-edit" data-id="${log.id}">✏️ 编辑</button><button class="log-del" data-id="${log.id}">❌ 删除</button></div>`;
                 logList.innerHTML = html;
             }
             function addVillageLog() { const text = logInput.value.trim(); if (!text) { logHint.textContent = '⚠️ 请先输入日志内容'; return; } const logs = loadVillageLogs(); logs.push({ id: makeLogId(), time: getGameTimeStamp(), text: text }); saveVillageLogs(logs); logInput.value = ''; logHint.textContent = ''; renderVillageLogs(); }
             function appendAutoLog(text) { const logs = loadVillageLogs(); logs.push({ id: makeLogId(), time: getGameTimeStamp(), text: text }); saveVillageLogs(logs); renderVillageLogs(); }
             function deleteVillageLog(id) { let logs = loadVillageLogs(); logs = logs.filter(function(l) { return l.id !== id; }); saveVillageLogs(logs); renderVillageLogs(); }
+            function updateVillageLogText(id, text) {
+                if (!text) { showToast('日志内容不能为空'); return; }
+                pushUndo('编辑日志');
+                const logs = loadVillageLogs();
+                let hit = false;
+                for (const l of logs) if (l.id === id) { l.text = text; hit = true; }
+                if (!hit) return;
+                saveVillageLogs(logs);
+                renderVillageLogs();
+                showToast('日志已更新');
+            }
             logBtn.addEventListener('click', addVillageLog);
             logInput.addEventListener('input', function() { logHint.textContent = ''; });
-            logList.addEventListener('click', function(e) { const delBtn = e.target.closest('.log-del'); if (!delBtn) return; deleteVillageLog(delBtn.getAttribute('data-id')); });
+            logList.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.log-edit');
+                if (editBtn) {
+                    const entry = editBtn.closest('.log-entry');
+                    const textEl = entry ? entry.querySelector('.log-text') : null;
+                    if (!textEl) return;
+                    if (textEl.isContentEditable) {
+                        updateVillageLogText(editBtn.getAttribute('data-id'), textEl.textContent.trim());
+                    } else {
+                        textEl.contentEditable = 'true';
+                        textEl.focus();
+                        try {
+                            const range = document.createRange(); range.selectNodeContents(textEl);
+                            const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+                        } catch (err) {}
+                        editBtn.textContent = '💾 保存';
+                        showToast('可直接修改内容，改完点「💾 保存」');
+                    }
+                    return;
+                }
+                const delBtn = e.target.closest('.log-del'); if (!delBtn) return; deleteVillageLog(delBtn.getAttribute('data-id'));
+            });
             clearLogBtn.addEventListener('click', function() { confirmModal.classList.remove('hidden'); });
-            confirmYes.addEventListener('click', function() { localStorage.removeItem(VILLAGE_LOG_KEY); confirmModal.classList.add('hidden'); renderVillageLogs(); });
+            confirmYes.addEventListener('click', function() { pushUndo('清空所有日志'); localStorage.removeItem(VILLAGE_LOG_KEY); confirmModal.classList.add('hidden'); renderVillageLogs(); });
             confirmNo.addEventListener('click', function() { confirmModal.classList.add('hidden'); });
             confirmModal.addEventListener('click', function(e) { if (e.target === confirmModal) confirmModal.classList.add('hidden'); });
             loadGameTime();
@@ -449,6 +584,7 @@
 
             // ================= 玩家：玩家推测 =================
             const guessList = document.getElementById('guessList');
+            const resetGuessesBtn = document.getElementById('resetGuessesBtn');
             const GUESSES_KEY = 'village_guesses';
             const GOD_ROLE_LIST = ['长老','预言家','女巫','守护者','猎人','丘比特'];
             let guesses = [];
@@ -472,6 +608,8 @@
             guessList.addEventListener('change', function(e) { const idx = parseInt(e.target.getAttribute('data-index'), 10); if (e.target.classList.contains('guess-cat')) { guesses[idx].category = e.target.value; if (e.target.value !== 'god') guesses[idx].godRole = ''; saveGuesses(); renderGuesses(); } else if (e.target.classList.contains('guess-god')) { guesses[idx].godRole = e.target.value; saveGuesses(); } });
             guesses = loadGuesses();
             renderGuesses();
+            function resetGuesses() { guesses = defaultGuesses(); saveGuesses(); renderGuesses(); }
+            resetGuessesBtn.addEventListener('click', resetGuesses);
 
             // ================= 主持人：投票 =================
             const voteList = document.getElementById('voteList');
@@ -483,13 +621,16 @@
             let voteVotes = [];
             let voteSheriff = -1;
             let sheriffElectionMode = false;
+            let voteRunoffMode = false;       // 是否处于第二轮（平票复投）
+            let voteRunoffTargets = [];       // 第二轮候选（平票者）
             function defaultVotes() { return new Array(15).fill(-1); }
-            function loadVotes() { try { const data = JSON.parse(localStorage.getItem(VOTE_KEY)); if (data && Array.isArray(data.votes) && data.votes.length === 15) return data; } catch (e) {} return { votes: defaultVotes(), sheriff: -1 }; }
-            function saveVotes() { localStorage.setItem(VOTE_KEY, JSON.stringify({ votes: voteVotes, sheriff: voteSheriff })); }
+            function loadVotes() { try { const data = JSON.parse(localStorage.getItem(VOTE_KEY)); if (data && Array.isArray(data.votes) && data.votes.length === 15) return data; } catch (e) {} return { votes: defaultVotes(), sheriff: -1, runoffMode: false, runoffTargets: [] }; }
+            function saveVotes() { localStorage.setItem(VOTE_KEY, JSON.stringify({ votes: voteVotes, sheriff: voteSheriff, runoffMode: voteRunoffMode, runoffTargets: voteRunoffTargets })); }
             function refreshSheriffSelect() { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 无警长 —</option>'; for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${voteSheriff === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } sheriffSelect.innerHTML = opts; }
             function renderVoteList() {
                 refreshSheriffSelect(); const names = parsePlayerNames(playerNamesInput.value); let html = '';
-                for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; const dead = isDead(i); const isSheriff = (voteSheriff === i); let opts = '<option value="-1">弃票</option>'; for (let t = 0; t < 15; t++) { if (isDead(t)) continue; const tnm = names[t] ? `（${names[t]}）` : ''; opts += `<option value="${t}"${voteVotes[i] === t ? ' selected' : ''}>${t + 1}号${tnm}</option>`; } html += `<div class="vote-row${dead ? ' dead' : ''}"><span class="vote-voter">${i + 1}号${nm}${isSheriff ? ' 👑' : ''}${dead ? ' 💀' : ''}</span><span class="vote-arrow">→</span><select class="vote-target" data-index="${i}"${dead ? ' disabled' : ''}>${opts}</select></div>`; }
+                if (voteRunoffMode) html += `<div class="vote-note">⚖️ 第 2 轮投票进行中：本轮只能投给平票者 ${voteRunoffTargets.map(function(t) { return playerLabel(t); }).join('、')}；若再次平票则无人出局，直接进入当天的黑夜。</div>`;
+                for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; const dead = isDead(i); const isSheriff = (voteSheriff === i); let opts = '<option value="-1">弃票</option>'; for (let t = 0; t < 15; t++) { if (isDead(t)) continue; if (voteRunoffMode && voteRunoffTargets.indexOf(t) < 0) continue; const tnm = names[t] ? `（${names[t]}）` : ''; opts += `<option value="${t}"${voteVotes[i] === t ? ' selected' : ''}>${t + 1}号${tnm}</option>`; } html += `<div class="vote-row${dead ? ' dead' : ''}"><span class="vote-voter">${i + 1}号${nm}${isSheriff ? ' 👑' : ''}${dead ? ' 💀' : ''}</span><span class="vote-arrow">→</span><select class="vote-target" data-index="${i}"${dead ? ' disabled' : ''}>${opts}</select></div>`; }
                 voteList.innerHTML = html; renderVoteResult();
             }
             function computeVoteRanking() { const counts = new Array(15).fill(0); let abstain = 0; let aliveVoters = 0; for (let v = 0; v < 15; v++) { if (isDead(v)) continue; aliveVoters++; const t = voteVotes[v]; if (t < 0 || t >= 15 || isDead(t)) { abstain++; continue; } const weight = (!sheriffElectionMode && v === voteSheriff) ? 2 : 1; counts[t] += weight; } const ranked = []; for (let t = 0; t < 15; t++) if (counts[t] > 0) ranked.push({ target: t, votes: counts[t] }); ranked.sort(function(a, b) { return b.votes - a.votes; }); return { ranked: ranked, abstain: abstain, aliveVoters: aliveVoters }; }
@@ -504,35 +645,68 @@
                         if (top.length > 1) html += `<div class="vote-verdict">⚖️ 平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）</div>`;
                         else { html += `<div class="vote-verdict">👑 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 当选警长</div>`; html += `<button class="confirm-sheriff-btn" data-target="${top[0].target}">👑 确认竞选（${top[0].target + 1}号当选警长）</button>`; }
                     }
+                } else if (voteRunoffMode) {
+                    const cands = voteRunoffTargets.filter(function(t) { return !isDead(t); });
+                    const candText = cands.map(function(t) { return `${t + 1}号`; }).join('、');
+                    html = `<div class="vote-tally-title">⚖️ 第 2 轮投票（平票复投：${candText}）· 存活投票 ${r.aliveVoters} 人 · 弃票 ${r.abstain} 人</div>`;
+                    const ranked = r.ranked.filter(function(x) { return cands.indexOf(x.target) >= 0; });
+                    if (!ranked.length) html += '<div class="vote-none">暂无有效投票</div>';
+                    else {
+                        const maxVotes = ranked[0].votes; const top = ranked.filter(function(x) { return x.votes === maxVotes; });
+                        html += '<ol class="vote-ranking">'; for (const x of ranked) html += `<li>${x.target + 1}号：<b>${x.votes}</b> 票</li>`; html += '</ol>';
+                        if (top.length > 1) {
+                            html += `<div class="vote-verdict">⚖️ 第 2 轮仍然平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）→ 无人出局，直接进入当天的黑夜</div>`;
+                            html += '<button class="end-day-btn">🌙 进入下一阶段（当天黑夜）</button>';
+                        } else if (isDead(top[0].target)) html += `<div class="vote-verdict">⚖️ ${top[0].target + 1}号 已被处决</div>`;
+                        else { html += `<div class="vote-verdict">⚖️ 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 将被处决</div>`; html += `<button class="exec-btn" data-target="${top[0].target}">⚖️ 确认处决（标记死亡）</button>`; }
+                    }
                 } else {
                     html = `<div class="vote-tally-title">📊 票数统计（存活投票 ${r.aliveVoters} 人 · 弃票 ${r.abstain} 人）</div>`;
                     if (!r.ranked.length) html += '<div class="vote-none">暂无有效投票</div>';
-                    else { const maxVotes = r.ranked[0].votes; const top = r.ranked.filter(function(x) { return x.votes === maxVotes; }); html += '<ol class="vote-ranking">'; for (const x of r.ranked) html += `<li>${x.target + 1}号：<b>${x.votes}</b> 票</li>`; html += '</ol>'; if (top.length > 1) html += `<div class="vote-verdict">⚖️ 平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）</div>`; else if (isDead(top[0].target)) html += `<div class="vote-verdict">⚖️ ${top[0].target + 1}号 已被处决</div>`; else { html += `<div class="vote-verdict">⚖️ 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 将被处决</div>`; html += `<button class="exec-btn" data-target="${top[0].target}">⚖️ 确认处决（标记死亡）</button>`; } }
+                    else { const maxVotes = r.ranked[0].votes; const top = r.ranked.filter(function(x) { return x.votes === maxVotes; }); html += '<ol class="vote-ranking">'; for (const x of r.ranked) html += `<li>${x.target + 1}号：<b>${x.votes}</b> 票</li>`; html += '</ol>'; if (top.length > 1) { html += `<div class="vote-verdict">⚖️ 平票：${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')}（各 ${maxVotes} 票）→ 需进行第二轮投票</div>`; html += `<button class="runoff-btn" data-targets="${top.map(function(x) { return x.target; }).join(',')}">🔄 开始第二轮投票（仅 ${top.map(function(x) { return (x.target + 1) + '号'; }).join('、')} 可被投票）</button>`; } else if (isDead(top[0].target)) html += `<div class="vote-verdict">⚖️ ${top[0].target + 1}号 已被处决</div>`; else { html += `<div class="vote-verdict">⚖️ 得票最高：${top[0].target + 1}号（${maxVotes} 票）→ 将被处决</div>`; html += `<button class="exec-btn" data-target="${top[0].target}">⚖️ 确认处决（标记死亡）</button>`; } }
                 }
                 voteResultDiv.innerHTML = html;
             }
-            function executePlayer(target) { if (isDead(target)) return; writeVoteLog(); markDead(target, REASON_VOTE); finishDeathResolution(); }
+            function startRunoff(targets) {
+                const list = (targets || []).filter(function(n) { return !isNaN(n); });
+                if (list.length < 2) return;
+                pushUndo('开始第二轮投票');
+                voteRunoffMode = true;
+                voteRunoffTargets = list;
+                voteVotes = defaultVotes();
+                saveVotes();
+                renderVoteList();
+                appendAutoLog(`【${getGameTimeStamp()}投票】平票，进入第二轮投票：候选 ${list.map(function(t) { return playerLabel(t); }).join('、')}`);
+            }
+            function executePlayer(target) { if (isDead(target)) return; pushUndo('投票处决 ' + playerLabel(target)); writeVoteLog(); markDead(target, REASON_VOTE); voteRunoffMode = false; voteRunoffTargets = []; saveVotes(); finishDeathResolution(); }
             voteList.addEventListener('change', function(e) { if (e.target.classList.contains('vote-target')) { const idx = parseInt(e.target.getAttribute('data-index'), 10); voteVotes[idx] = parseInt(e.target.value, 10); saveVotes(); renderVoteResult(); } });
             voteResultDiv.addEventListener('click', function(e) {
                 const execBtn = e.target.closest('.exec-btn');
                 if (execBtn) { executePlayer(parseInt(execBtn.getAttribute('data-target'), 10)); return; }
                 const sheriffBtn = e.target.closest('.confirm-sheriff-btn');
-                if (sheriffBtn) { confirmSheriff(parseInt(sheriffBtn.getAttribute('data-target'), 10)); }
+                if (sheriffBtn) { confirmSheriff(parseInt(sheriffBtn.getAttribute('data-target'), 10)); return; }
+                const runoffBtn = e.target.closest('.runoff-btn');
+                if (runoffBtn) { startRunoff(runoffBtn.getAttribute('data-targets').split(',').map(function(s) { return parseInt(s, 10); })); return; }
+                const endDayBtn = e.target.closest('.end-day-btn');
+                if (endDayBtn) { showAdvanceDayModal(); }
             });
             sheriffSelect.addEventListener('change', function() { voteSheriff = sheriffSelect.value === '' ? -1 : parseInt(sheriffSelect.value, 10); saveVotes(); renderVoteList(); });
-            clearVoteBtn.addEventListener('click', function() { voteVotes = defaultVotes(); voteSheriff = -1; saveVotes(); renderVoteList(); });
+            clearVoteBtn.addEventListener('click', function() { pushUndo('清空本轮投票'); voteVotes = defaultVotes(); voteSheriff = -1; voteRunoffMode = false; voteRunoffTargets = []; saveVotes(); renderVoteList(); showToast('已清空本轮投票'); });
             sheriffElectionBtn.addEventListener('click', function() {
                 sheriffElectionMode = !sheriffElectionMode;
-                if (sheriffElectionMode) { voteVotes = defaultVotes(); voteSheriff = -1; }
+                if (sheriffElectionMode) { voteVotes = defaultVotes(); voteSheriff = -1; voteRunoffMode = false; voteRunoffTargets = []; }
                 saveVotes();
                 sheriffElectionBtn.textContent = sheriffElectionMode ? '🔙 退出警长竞选' : '👑 开始警长竞选';
                 renderVoteList();
             });
             function confirmSheriff(target) {
                 writeVoteLog();
+                pushUndo('确认警长：' + playerLabel(target));
                 voteSheriff = target;
                 sheriffElectionMode = false;
                 voteVotes = defaultVotes();
+                voteRunoffMode = false;
+                voteRunoffTargets = [];
                 saveVotes();
                 sheriffElectionBtn.textContent = '👑 开始警长竞选';
                 renderVoteList();
@@ -566,7 +740,7 @@
                 } else lines.push('无有效投票');
                 appendAutoLog(lines.join('\n'));
             }
-            (function initVote() { const data = loadVotes(); voteVotes = data.votes || defaultVotes(); voteSheriff = (typeof data.sheriff === 'number') ? data.sheriff : -1; renderVoteList(); })();
+            (function initVote() { const data = loadVotes(); voteVotes = data.votes || defaultVotes(); voteSheriff = (typeof data.sheriff === 'number') ? data.sheriff : -1; voteRunoffMode = !!data.runoffMode; voteRunoffTargets = Array.isArray(data.runoffTargets) ? data.runoffTargets : []; renderVoteList(); })();
 
             // ================= 主持人：主持人控制台 / 玩家视图 =================
             const consolePanel = document.getElementById('consolePanel');
@@ -579,6 +753,11 @@
             const vampConfirmText = document.getElementById('vampConfirmText');
             const vampConfirmYes = document.getElementById('vampConfirmYes');
             const vampConfirmNo = document.getElementById('vampConfirmNo');
+            const suicideConfirmModal = document.getElementById('suicideConfirmModal');
+            const suicideConfirmText = document.getElementById('suicideConfirmText');
+            const suicideConfirmYes = document.getElementById('suicideConfirmYes');
+            const suicideConfirmNo = document.getElementById('suicideConfirmNo');
+            let pendingSuicideIndex = -1;
             const hunterModal = document.getElementById('hunterModal');
             const hunterTargetSelect = document.getElementById('hunterTargetSelect');
             const hunterConfirm = document.getElementById('hunterConfirm');
@@ -600,6 +779,7 @@
             const playerDeathReason = document.getElementById('playerDeathReason');
             const playerDeathConfirm = document.getElementById('playerDeathConfirm');
             const playerDeathCancel = document.getElementById('playerDeathCancel');
+            const resetPublicDeathsBtn = document.getElementById('resetPublicDeathsBtn');
             const PUBLIC_DEATHS_KEY = 'village_public_deaths';
             const PUBLIC_ROLES = ['普通村民','吸血鬼','长老','预言家','女巫','守护者','猎人','丘比特','吹笛人'];
             let publicDeaths = {};
@@ -611,8 +791,13 @@
             let playerPhase = '白天';
             const PLAYER_TIME_KEY = 'village_player_time';
             function getPlayerTimeStamp() { return `第${chineseDay(playerDay)}天${playerPhase}`; }
-            function loadPlayerTime() { try { const d = JSON.parse(localStorage.getItem(PLAYER_TIME_KEY)); if (d && typeof d.day === 'number') { playerDay = Math.min(7, Math.max(1, d.day)); playerPhase = (d.phase === '夜晚') ? '夜晚' : '白天'; } } catch (e) {} }
+            function loadPlayerTime() { try { const d = JSON.parse(localStorage.getItem(PLAYER_TIME_KEY)); if (d && typeof d.day === 'number') { playerDay = Math.min(MAX_DAY, Math.max(1, d.day)); playerPhase = (d.phase === '夜晚') ? '夜晚' : '白天'; } } catch (e) {} }
             function savePlayerTime() { localStorage.setItem(PLAYER_TIME_KEY, JSON.stringify({ day: playerDay, phase: playerPhase })); }
+            const elderReviveModal = document.getElementById('elderReviveModal');
+            const elderReviveText = document.getElementById('elderReviveText');
+            const elderReviveYes = document.getElementById('elderReviveYes');
+            const elderReviveNo = document.getElementById('elderReviveNo');
+            let pendingElderReviveIndex = -1;
             const resetDeathModal = document.getElementById('resetDeathModal');
             const resetDeathYes = document.getElementById('resetDeathYes');
             const resetDeathNo = document.getElementById('resetDeathNo');
@@ -628,16 +813,21 @@
             let piperPending = [];
             let vampParticipants = new Set();
             let hunterPending = false;
+            let hunterBlockedReason = '';
             let sheriffTransferPending = false;
             let pendingSheriffTransferFrom = -1;
             let sheriffTransfers = [];
             let vampPendingTarget = -1;
             const SHERIFF_TRANSFERS_KEY = 'village_sheriff_transfers';
+            const VAMP_SUICIDE_USED_KEY = 'village_vamp_suicide_used';
+            let vampireSuicideUsed = false;
+            function loadVampireSuicideUsed() { try { return localStorage.getItem(VAMP_SUICIDE_USED_KEY) === '1'; } catch (e) { return false; } }
+            function saveVampireSuicideUsed() { localStorage.setItem(VAMP_SUICIDE_USED_KEY, vampireSuicideUsed ? '1' : '0'); }
             function loadSheriffTransfers() { try { const arr = JSON.parse(localStorage.getItem(SHERIFF_TRANSFERS_KEY)); if (Array.isArray(arr)) return arr; } catch (e) {} return []; }
             function saveSheriffTransfers() { localStorage.setItem(SHERIFF_TRANSFERS_KEY, JSON.stringify(sheriffTransfers)); }
 
-            function defaultNightActions() { return { piper: { day: 0, count: 0, targets: [] }, vampire: { day: 0, target: -1, participants: [], status: '' }, guardian: { night: 0, target: -1 }, witch: { poisonUsed: false, antidoteUsed: false, night: 0, lastAction: '' }, seer: { night: 0, checked: false, target: -1, faction: '' } }; }
-            function loadNightActions() { try { const d = JSON.parse(localStorage.getItem(NIGHT_ACTIONS_KEY)); if (d && typeof d === 'object') { const def = defaultNightActions(); return { piper: Object.assign({}, def.piper, d.piper), vampire: Object.assign({}, def.vampire, d.vampire), guardian: Object.assign({}, def.guardian, d.guardian), witch: Object.assign({}, def.witch, d.witch), seer: Object.assign({}, def.seer, d.seer) }; } } catch (e) {} return defaultNightActions(); }
+            function defaultNightActions() { return { piper: { day: 0, count: 0, targets: [] }, vampire: { day: 0, target: -1, participants: [], status: '', suicide: { day: 0, target: -1, status: '' } }, guardian: { night: 0, target: -1 }, witch: { poisonUsed: false, antidoteUsed: false, night: 0, lastAction: '' }, seer: { night: 0, checked: false, target: -1, faction: '' } }; }
+            function loadNightActions() { try { const d = JSON.parse(localStorage.getItem(NIGHT_ACTIONS_KEY)); if (d && typeof d === 'object') { const def = defaultNightActions(); const vamp = Object.assign({}, def.vampire, d.vampire); vamp.suicide = Object.assign({}, def.vampire.suicide, (d.vampire && d.vampire.suicide) || {}); return { piper: Object.assign({}, def.piper, d.piper), vampire: vamp, guardian: Object.assign({}, def.guardian, d.guardian), witch: Object.assign({}, def.witch, d.witch), seer: Object.assign({}, def.seer, d.seer) }; } } catch (e) {} return defaultNightActions(); }
             function saveNightActions() { localStorage.setItem(NIGHT_ACTIONS_KEY, JSON.stringify(nightActions)); }
             function loadBewitched() { try { const parsed = JSON.parse(localStorage.getItem(SPELL_KEY)); if (Array.isArray(parsed)) return new Set(parsed); } catch (e) {} return new Set(); }
             function saveBewitched() { localStorage.setItem(SPELL_KEY, JSON.stringify(Array.from(bewitchedSet))); }
@@ -649,20 +839,97 @@
             function aliveTargetOptions(selected) { let opts = '<option value="">— 选择 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i)) continue; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${playerLabel(i)}</option>`; } return opts; }
             function guardTargetOptions(prevTarget) { let opts = '<option value="">— 选择守护对象 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i) || i === prevTarget) continue; opts += `<option value="${i}">${playerLabel(i)}</option>`; } return opts; }
             function piperTargetOptions() { const names = parsePlayerNames(playerNamesInput.value); const piper = getPiperIndex(); let opts = '<option value="">— 选择玩家 —</option>'; for (let i = 0; i < 15; i++) { if (i === piper || isDead(i) || bewitchedSet.has(i) || piperPending.indexOf(i) >= 0) continue; opts += `<option value="${i}">${i + 1}号${names[i] ? `（${names[i]}）` : ''}</option>`; } return opts; }
-            function seerFactionOf(role) { if (role === '吸血鬼') return '吸血鬼阵营'; if (role === '吹笛人') return '中立阵营（吹笛人）'; if (role === '普通村民') return '好人阵营（普通村民）'; return '好人阵营（神职）'; }
+            // 规则书：查验结果只有两种口径——「好人」或「中立或以下」；括号内标注真实身份，仅供主持人参考
+            function seerAnswerOf(role) { return (role === '吸血鬼' || role === '吹笛人') ? '中立或以下阵营' : '好人阵营'; }
+            function seerFactionOf(role) { return `${seerAnswerOf(role)}（真实身份：${role || '未知'}）`; }
             function resolveSeerTarget(input) { const s = String(input || '').trim(); if (!s) return -1; const m = s.match(/^(\d+)\s*号/); if (m) { const idx = parseInt(m[1], 10) - 1; if (idx >= 0 && idx < 15) return idx; } const names = parsePlayerNames(playerNamesInput.value); for (let i = 0; i < 15; i++) if (names[i] && names[i] === s) return i; return -1; }
+
+            // ================= 胜利条件判定（仅提示，由主持人判断是否结束游戏） =================
+            function roleClass(role) {
+                if (role === '吸血鬼') return 'vampire';
+                if (role === '普通村民') return 'villager';
+                if (role === '吹笛人') return 'neutral';
+                if (role === '丘比特') return 'cupid';
+                return 'god'; // 长老 / 预言家 / 女巫 / 猎人 / 守护者
+            }
+            function aliveIndices() { const r = []; for (let i = 0; i < 15; i++) if (!isDead(i)) r.push(i); return r; }
+            function victoryStatus() {
+                const alive = aliveIndices();
+                const counts = { villager: 0, vampire: 0, god: 0, cupid: 0, neutral: 0 };
+                if (currentRoles) for (const i of alive) counts[roleClass(currentRoles[i])]++;
+                const goodWin = counts.vampire === 0;
+                const vampireWin = (counts.villager === 0 || counts.god === 0);
+                // 吹笛者：场上所有存活玩家（吹笛人自己不能对自己施法，需排除）均被施加魔法
+                const piperIdx = getPiperIndex();
+                const spellTargets = alive.filter(function(i) { return i !== piperIdx; });
+                const piperDone = spellTargets.filter(function(i) { return bewitchedSet.has(i); }).length;
+                const piperWin = spellTargets.length > 0 && piperDone === spellTargets.length;
+                // 情侣方
+                let coupleText = '尚未指定情侣';
+                let coupleReached = false;
+                let coupleShare = '';
+                if (coupleA >= 0 && coupleB >= 0 && currentRoles) {
+                    const ca = roleClass(currentRoles[coupleA]), cb = roleClass(currentRoles[coupleB]);
+                    const isGood = function(c) { return c === 'villager' || c === 'god'; };
+                    if ((isGood(ca) && cb === 'vampire') || (isGood(cb) && ca === 'vampire')) {
+                        coupleText = '好人 × 吸血鬼组合：场上仅剩情侣二人存活时获胜';
+                        coupleReached = alive.length === 2 && !isDead(coupleA) && !isDead(coupleB);
+                    } else if (isGood(ca) && isGood(cb)) {
+                        coupleText = '好人对组合：与好人阵营共享胜利条件';
+                        coupleShare = 'good';
+                    } else if (ca === 'vampire' && cb === 'vampire') {
+                        coupleText = '吸血鬼对组合：与吸血鬼阵营共享胜利条件';
+                        coupleShare = 'vampire';
+                    } else {
+                        coupleText = '组合含中立 / 丘比特，规则书未定义 —— 请主持人自行判断';
+                    }
+                }
+                if (coupleShare === 'good') coupleReached = goodWin;
+                if (coupleShare === 'vampire') coupleReached = vampireWin;
+                return {
+                    alive: alive, counts: counts, spellTargets: spellTargets,
+                    goodWin: goodWin, vampireWin: vampireWin, piperWin: piperWin,
+                    piperDone: piperDone, piperTotal: spellTargets.length,
+                    coupleText: coupleText, coupleReached: coupleReached, coupleShare: coupleShare,
+                    any: goodWin || vampireWin || piperWin || coupleReached
+                };
+            }
+            function anyVictoryReached() { return currentRoles ? victoryStatus().any : false; }
+            function victoryPanelHtml() {
+                if (!currentRoles) return '<div class="console-block"><div class="console-block-title">🏁 胜利条件</div><div class="action-limit">尚未分配身份，无法判定。</div></div>';
+                const v = victoryStatus();
+                const mark = function(b) { return b ? '✅ <b>已达成</b>' : '⬜ 未达成'; };
+                let html = '<div class="console-block"><div class="console-block-title">🏁 胜利条件（供主持人判断，不会自动结束游戏）</div>';
+                if (v.any) html += '<div class="notice-banner">🏁 已有阵营满足胜利条件 —— 可与全场确认后点击顶部「🏁 结算与导出」。</div>';
+                html += '<div class="flow-list">';
+                html += `<div>${mark(v.goodWin)} · <b>好人阵营</b>：杀死所有吸血鬼（存活吸血鬼 <b>${v.counts.vampire}</b> 人）</div>`;
+                html += `<div>${mark(v.vampireWin)} · <b>吸血鬼阵营</b>：杀死所有普通村民（存活 <b>${v.counts.villager}</b> 人）或杀死所有神职（不含丘比特，存活 <b>${v.counts.god}</b> 人）</div>`;
+                html += `<div>${mark(v.piperWin)} · <b>吹笛者</b>：场上所有存活玩家均被施法（<b>${v.piperDone}</b> / ${v.piperTotal}）</div>`;
+                html += `<div>${mark(v.coupleReached)} · <b>情侣方</b>：${v.coupleText}（丘比特与情侣方共享胜利条件）</div>`;
+                html += '</div>';
+                html += '<div class="action-limit">注：吹笛者条件可与其他胜利条件共存（双方同胜）；丘比特随情侣方结算；本面板只提示，不代替主持人裁决。</div>';
+                html += '</div>';
+                return html;
+            }
 
             function markDead(index, reason) {
                 if (isDead(index)) return true;
-                if (currentRoles && currentRoles[index] === '长老') {
+                if (isElderRole(index)) {
+                    // 长老拥有两次生命：只有「吸血鬼击杀」会消耗生命（2 命时不死，减为 1 命）
                     if (reason === REASON_VAMPIRE && elderLives === 2) { elderLives = 1; saveElderState(); return false; }
-                    if (reason !== REASON_VAMPIRE && !godsDisabled) { godsDisabled = true; saveElderState(); }
+                    // 特殊死因（女巫毒杀 / 猎人猎杀 / 投票处决）：无视生命数立刻死亡，神职能力永久失效
+                    if (isElderFatalReason(reason) && !godsDisabled) { godsDisabled = true; saveElderState(); }
                 }
                 deadSet.add(index);
                 deathReasons[index] = reason;
                 deathTimes[index] = getGameTimeStamp();
                 saveDeadState();
-                if (currentRoles && currentRoles[index] === '猎人' && !godsDisabled) hunterPending = true;
+                if (currentRoles && currentRoles[index] === '猎人') {
+                    // 规则书：猎人死亡后若整场游戏继续（未满足任一阵营胜利条件）才能开枪
+                    if (godsDisabled) hunterBlockedReason = '神职能力已因长老特殊死亡而失效';
+                    else if (anyVictoryReached()) hunterBlockedReason = '游戏已满足任一阵营的胜利条件，猎人不能开枪';
+                    else hunterPending = true;
+                }
                 if (voteSheriff === index) { sheriffTransferPending = true; pendingSheriffTransferFrom = index; }
                 if (index === coupleA && coupleB >= 0 && !isDead(coupleB)) markDead(coupleB, REASON_COUPLE);
                 else if (index === coupleB && coupleA >= 0 && !isDead(coupleA)) markDead(coupleA, REASON_COUPLE);
@@ -673,16 +940,26 @@
                 refreshGameViews();
             }
             function revivePlayer(index) {
-                if (!isDead(index)) return;
+                if (!isDead(index)) return false;
+                const wasElder = isElderRole(index);
+                const reason = deathReason(index);
                 deadSet.delete(index);
                 delete deathReasons[index];
                 delete deathTimes[index];
-                if (currentRoles && currentRoles[index] === '长老') { elderLives = 2; godsDisabled = false; }
+                if (wasElder) {
+                    // 被吸血鬼击杀（第二条命被打掉）后由女巫解药救活 → 仅拥有一次生命，神职能力保留
+                    if (reason === REASON_VAMPIRE) elderLives = 1;
+                    // 毒杀 / 猎杀 / 投票处决致死：神职能力已永久消失，撤销死亡也不会恢复
+                    else if (isElderFatalReason(reason)) godsDisabled = true;
+                    // 其余死因（如情侣殉情）为灰色地带：生命与神职能力均保持原状，不主动恢复
+                    saveElderState();
+                }
                 saveDeadState();
-                saveElderState();
                 refreshGameViews();
+                return true;
             }
             function resetAllDeaths() {
+                pushUndo('重置所有死亡');
                 deadSet.clear();
                 for (const k in deathReasons) delete deathReasons[k];
                 for (const k in deathTimes) delete deathTimes[k];
@@ -695,7 +972,43 @@
             function doRevive() {
                 const sel = consolePanel.querySelector('.revive-select'); if (!sel) return;
                 const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
-                revivePlayer(idx);
+                if (isElderRole(idx)) { showElderReviveModal(idx); return; }
+                applyRevive(idx);
+            }
+            function elderRevivePreview(idx) {
+                const reason = deathReason(idx);
+                if (reason === REASON_VAMPIRE) return { lives: 1, reason: reason, ability: '神职能力保持现状（本次死亡由吸血鬼击杀造成，不影响神职能力）' };
+                if (isElderFatalReason(reason)) return { lives: elderLives, reason: reason, ability: `神职能力保持失效（因「${reason}」而永久消失，撤销死亡不会恢复）` };
+                return { lives: elderLives, reason: reason, ability: `神职能力保持现状（「${reason}」不算规则书中的特殊死亡）` };
+            }
+            function showElderReviveModal(idx) {
+                pendingElderReviveIndex = idx;
+                const p = elderRevivePreview(idx);
+                elderReviveText.innerHTML = `👴 <b>${playerLabel(idx)}（长老）</b>当前死因：「${p.reason || '未知'}」<br>` +
+                    `按规则书，撤销死亡后生命值应复原为 <b>${p.lives}</b> 条；${p.ability}。<br>` +
+                    `<span style="color:#9a93b5;">本工具没有游戏内复活机制，「撤销死亡」仅用于修正误操作；若神职能力的失效是误判造成的，请再用上方「✨ 手动恢复神职能力」修正。</span>`;
+                elderReviveModal.classList.remove('hidden');
+            }
+            function applyRevive(idx) {
+                if (!isDead(idx)) return;
+                const wasElder = isElderRole(idx);
+                const reason = deathReason(idx);
+                pushUndo('撤销死亡：' + playerLabel(idx));
+                if (!revivePlayer(idx)) return;
+                let note = `撤销死亡：${playerLabel(idx)} 复活`;
+                if (wasElder) {
+                    if (reason === REASON_VAMPIRE) note += `（长老生命值复原为 1 条：两条命中的最后一条被吸血鬼击杀，神职能力保持现状）`;
+                    else if (isElderFatalReason(reason)) note += `（长老生命值保持为 ${elderLives} 条：特殊死亡不消耗生命；神职能力已永久失效，不会恢复）`;
+                    else note += `（长老生命值保持为 ${elderLives} 条：「${reason}」不算特殊死亡，神职能力不变）`;
+                }
+                appendAutoLog(note);
+            }
+            function restoreGodPowers() {
+                if (!godsDisabled) return;
+                godsDisabled = false;
+                saveElderState();
+                appendAutoLog('主持人手动恢复神职能力（女巫 / 预言家 / 猎人 / 守护者 / 丘比特技能重新生效）');
+                renderConsole();
             }
             function resetPiper() {
                 bewitchedSet.clear();
@@ -708,7 +1021,9 @@
             function resetVampire() {
                 vampParticipants.clear();
                 vampPendingTarget = -1;
-                nightActions.vampire = { day: 0, target: -1, participants: [], status: '' };
+                nightActions.vampire = { day: 0, target: -1, participants: [], status: '', suicide: { day: 0, target: -1, status: '' } };
+                vampireSuicideUsed = false;
+                saveVampireSuicideUsed();
                 saveNightActions();
                 renderConsole();
             }
@@ -728,29 +1043,32 @@
                 renderConsole();
             }
             function guardConfirm() {
-                if (godsDisabled) return;
-                if (nightActions.guardian.night === gameDay) return;
+                if (godsDisabled) { showToast('神职能力已失效，守护者无法行动'); return; }
+                if (nightActions.guardian.night === gameDay) { showToast('本夜已经守护过，如需更改请先重置守护者操作'); return; }
                 const sel = consolePanel.querySelector('.guard-target'); if (!sel) return;
-                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
-                if (nightActions.guardian.night === gameDay - 1 && nightActions.guardian.target === idx) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) { showToast('请先选择要守护的玩家'); return; }
+                if (nightActions.guardian.night === gameDay - 1 && nightActions.guardian.target === idx) { showToast('守护者不得连续两晚守护同一人，请换一个目标'); return; }
+                pushUndo('守护者守护');
                 nightActions.guardian.night = gameDay;
                 nightActions.guardian.target = idx;
                 saveNightActions();
                 renderConsole();
             }
             function confirmCouple() {
-                if (coupleA < 0 || coupleB < 0 || coupleA === coupleB) return;
+                if (coupleA < 0 || coupleB < 0 || coupleA === coupleB) { showToast('请选择两名不同的玩家再确认绑定'); return; }
+                pushUndo('丘比特绑定情侣');
                 coupleLocked = true;
                 saveCouple();
                 renderConsole();
             }
             function resetCouple() {
+                pushUndo('重置情侣');
                 coupleA = -1; coupleB = -1; coupleLocked = false;
                 saveCouple();
                 renderConsole();
             }
             function writeCoupleLog() {
-                if (coupleA < 0 || coupleB < 0) return;
+                if (coupleA < 0 || coupleB < 0) { showToast('尚未绑定情侣，无法写入日志'); return; }
                 appendAutoLog(`丘比特绑定情侣：${playerLabel(coupleA)} ↔ ${playerLabel(coupleB)}`);
             }
             function writeNightSummaryLog() {
@@ -764,8 +1082,11 @@
                     let vt = `吸血鬼行动：击杀${playerLabel(vs.target)}` + (parts ? `（参与者：${parts}）` : '');
                     if (vs.status === 'saved') vt += '，被女巫解药解救';
                     else if (vs.status === 'protected') vt += '，被守护者保护';
+                    else if (vs.status === 'elder_lives') vt += '，目标为长老、仅损失一条生命而未死亡';
                     lines.push(vt);
                 } else lines.push('吸血鬼行动：无');
+                const vsu = vs.suicide;
+                if (vsu && vsu.day === gameDay && vsu.target >= 0) lines.push(`吸血鬼自杀：${playerLabel(vsu.target)}（${vsu.status === 'saved' ? '被女巫解药救治' : '死亡'}）· 本夜不计入动手人数`);
                 const g = nightActions.guardian;
                 lines.push(`守护者行动：${(g.night === gameDay && g.target >= 0) ? `守护${playerLabel(g.target)}` : '无'}`);
                 const s = nightActions.seer;
@@ -780,13 +1101,24 @@
                 appendAutoLog(lines.join('\n'));
             }
             function showAdvanceNightModal() {
-                advanceNightText.textContent = `是否进入第${chineseDay(gameDay + 1)}天白天？`;
+                if (skipDayPending()) advanceNightText.innerHTML = `🗡️ 本夜有吸血鬼自杀：将<b>跳过第${chineseDay(Math.min(MAX_DAY, gameDay + 1))}天白天</b>，直接进入黑夜。是否继续？`;
+                else advanceNightText.textContent = `是否进入第${chineseDay(gameDay + 1)}天白天？`;
                 advanceNightModal.classList.remove('hidden');
             }
             function advanceNightToDay() {
                 advanceNightModal.classList.add('hidden');
                 if (gamePhase !== '夜晚') return;
-                if (gameDay < 7) { gameDay += 1; gamePhase = '白天'; }
+                pushUndo('推进到第' + chineseDay(Math.min(MAX_DAY, gameDay + 1)) + '天');
+                if (skipDayPending()) {
+                    closeSuicideNight();
+                    if (gameDay < MAX_DAY) gameDay += 1;
+                    gamePhase = '夜晚';
+                    saveGameTime();
+                    appendAutoLog(`⏭️ 因本夜有吸血鬼自杀，跳过第${chineseDay(gameDay)}天白天，直接进入黑夜`);
+                    refreshGameViews();
+                    return;
+                }
+                if (gameDay < MAX_DAY) { gameDay += 1; gamePhase = '白天'; }
                 saveGameTime();
                 refreshGameViews();
             }
@@ -797,8 +1129,10 @@
             function advanceDayToNight() {
                 advanceDayModal.classList.add('hidden');
                 if (gamePhase !== '白天') return;
+                pushUndo('进入第' + chineseDay(gameDay) + '天黑夜');
                 writeDaySummary();
                 gamePhase = '夜晚';
+                voteRunoffMode = false; voteRunoffTargets = []; saveVotes();
                 saveGameTime();
                 refreshGameViews();
             }
@@ -818,7 +1152,8 @@
                 advanceDayBtn.disabled = (gamePhase !== '白天');
             }
             function resetHostBoard() {
-                const keys = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
+                pushUndo('重置所有内容（自动备份）');
+                const keys = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VAMP_SUICIDE_USED_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
                 for (const k of keys) localStorage.removeItem(k);
                 deadSet.clear();
                 for (const k in deathReasons) delete deathReasons[k];
@@ -829,13 +1164,17 @@
                 piperPending = [];
                 nightActions = defaultNightActions();
                 vampParticipants = new Set();
+                vampireSuicideUsed = false;
                 hunterPending = false;
+                hunterBlockedReason = '';
                 sheriffTransferPending = false;
                 pendingSheriffTransferFrom = -1;
                 sheriffTransfers = [];
                 vampPendingTarget = -1;
                 voteVotes = defaultVotes();
                 voteSheriff = -1;
+                voteRunoffMode = false;
+                voteRunoffTargets = [];
                 gameDay = 1; gamePhase = '白天';
                 saveGameTime();
                 currentRoles = null;
@@ -856,6 +1195,8 @@
                 const idx = parseInt(hunterTargetSelect.value, 10); if (isNaN(idx) || idx < 0) return;
                 hunterModal.classList.add('hidden');
                 hunterPending = false;
+                hunterBlockedReason = '';
+                pushUndo('猎人开枪击杀 ' + playerLabel(idx));
                 markDead(idx, REASON_HUNTER);
                 finishDeathResolution();
             }
@@ -882,16 +1223,23 @@
             }
 
             function toggleBewitch(i) { if (bewitchedSet.has(i)) bewitchedSet.delete(i); else bewitchedSet.add(i); }
-            function piperAdd() { const sel = consolePanel.querySelector('.piper-target'); if (!sel) return; const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return; const info = piperNightInfo(); if (piperPending.length >= info.remaining) return; if (piperPending.indexOf(idx) >= 0) return; piperPending.push(idx); renderConsole(); }
-            function showPiperConfirm() { if (!piperPending.length) return; piperConfirmText.textContent = `确定选择 ${piperPending.map(function(i) { return playerLabel(i); }).join(' 与 ')} 为吹笛对象吗？`; piperConfirmModal.classList.remove('hidden'); }
-            function applyPiperPending() { for (const i of piperPending) bewitchedSet.add(i); nightActions.piper.day = gameDay; nightActions.piper.count += piperPending.length; nightActions.piper.targets = (nightActions.piper.targets || []).concat(piperPending); piperPending = []; saveBewitched(); saveNightActions(); renderConsole(); }
+            function piperAdd() {
+                const sel = consolePanel.querySelector('.piper-target'); if (!sel) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) { showToast('请先选择要施法的玩家'); return; }
+                const info = piperNightInfo();
+                if (piperPending.length >= info.remaining) { showToast(`今晚还可施法 ${info.remaining} 人，请先确认或推进时间`); return; }
+                if (piperPending.indexOf(idx) >= 0) { showToast('该玩家已在待施法名单中'); return; }
+                piperPending.push(idx); renderConsole();
+            }
+            function showPiperConfirm() { if (!piperPending.length) { showToast('待施法名单为空'); return; } piperConfirmText.textContent = `确定选择 ${piperPending.map(function(i) { return playerLabel(i); }).join(' 与 ')} 为吹笛对象吗？`; piperConfirmModal.classList.remove('hidden'); }
+            function applyPiperPending() { if (!piperPending.length) return; pushUndo('吹笛人施法'); for (const i of piperPending) bewitchedSet.add(i); nightActions.piper.day = gameDay; nightActions.piper.count += piperPending.length; nightActions.piper.targets = (nightActions.piper.targets || []).concat(piperPending); piperPending = []; saveBewitched(); saveNightActions(); renderConsole(); }
 
             function showVampConfirm() {
                 const sel = consolePanel.querySelector('.vamp-target'); const target = parseInt(sel ? sel.value : '', 10);
-                if (isNaN(target) || target < 0) return;
-                const aliveVamps = vampireIndices().filter(function(v) { return !isDead(v); });
+                if (isNaN(target) || target < 0) { showToast('请先选择击杀目标'); return; }
+                const aliveVamps = activeVampireIndices();
                 const minP = Math.ceil(aliveVamps.length / 2);
-                if (vampParticipants.size < minP) return;
+                if (vampParticipants.size < minP) { showToast(`动手人数不足：至少需要 ${minP} 名吸血鬼参与（当前已勾选 ${vampParticipants.size} 名）`); return; }
                 vampPendingTarget = target;
                 vampConfirmText.textContent = `确认击杀 ${playerLabel(target)} 吗？参与者：${Array.from(vampParticipants).map(function(i) { return playerLabel(i); }).join('、')}（共 ${vampParticipants.size} 人）`;
                 vampConfirmModal.classList.remove('hidden');
@@ -906,60 +1254,185 @@
                 saveNightActions();
                 renderConsole();
             }
-            function resolveVampireKill() {
+            function settleVampireKill() {
                 const vs = nightActions.vampire;
                 if (!(vs.day === gameDay && vs.status === 'pending')) return;
                 const g = nightActions.guardian;
                 if (g.night === gameDay && g.target === vs.target) {
                     vs.status = 'protected';
                 } else {
-                    markDead(vs.target, REASON_VAMPIRE);
-                    vs.status = 'killed';
+                    // markDead 返回 false 表示目标未真正死亡（长老以第一条命承受了这一击）
+                    const died = markDead(vs.target, REASON_VAMPIRE);
+                    vs.status = died ? 'killed' : 'elder_lives';
                 }
                 saveNightActions();
                 finishDeathResolution();
             }
+            function resolveVampireKill() {
+                if (!(nightActions.vampire.day === gameDay && nightActions.vampire.status === 'pending')) { showToast('当前没有待结算的击杀'); return; }
+                askConfirm(`⚖️ 确认击杀「${playerLabel(nightActions.vampire.target)}」生效吗？<br>将按「女巫未使用解药」处理并结算死亡。`, function() {
+                    pushUndo('确认击杀生效');
+                    settleVampireKill();
+                });
+            }
+            function showSuicideConfirm() {
+                if (vampireSuicideUsed) { showToast('本场自杀机会已使用'); return; }
+                const sel = consolePanel.querySelector('.vamp-suicide-target'); if (!sel) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) { showToast('请先选择自杀的吸血鬼'); return; }
+                pendingSuicideIndex = idx;
+                suicideConfirmText.innerHTML = `🗡️ 确认让 ${playerLabel(idx)} 自杀吗？<br>该吸血鬼本夜不再参与击杀、不计入动手人数，且游戏将立刻跳过次日白天、直接进入黑夜；整场仅可自杀一次，女巫仍可使用解药救治。`;
+                suicideConfirmModal.classList.remove('hidden');
+            }
             function witchAntidote() {
-                if (nightActions.witch.antidoteUsed || nightActions.witch.night === gameDay || godsDisabled) return;
+                if (nightActions.witch.antidoteUsed) { showToast('解药已经用过了（整场仅一瓶）'); return; }
+                if (nightActions.witch.night === gameDay) { showToast('女巫本夜已经用过药了（每晚只能用一种）'); return; }
+                if (godsDisabled) { showToast('神职能力已失效，女巫无法用药'); return; }
                 const vs = nightActions.vampire;
-                if (!(vs.day === gameDay && vs.status === 'pending')) return;
+                if (!(vs.day === gameDay && vs.status === 'pending')) { showToast('本夜没有待解救的击杀目标'); return; }
                 const g = nightActions.guardian;
-                if (g.night === gameDay && g.target === vs.target) return; // 已被守护者保护，无需解药
-                if (currentRoles && currentRoles[vs.target] === '长老' && elderLives === 2) return; // 长老第一条命被击杀，女巫不知情，无法解药
+                if (g.night === gameDay && g.target === vs.target) { showToast('目标已被守护者保护，无需使用解药'); return; }
+                if (isElderRole(vs.target) && elderLives === 2) { showToast('长老以第一条命承受了这次击杀、并未死亡，女巫无从得知'); return; }
+                pushUndo('女巫使用解药');
                 nightActions.witch.antidoteUsed = true; nightActions.witch.night = gameDay;
-                nightActions.witch.lastAction = `使用解药解救 ${playerLabel(vs.target)}`;
+                nightActions.witch.lastAction = `使用解药解救 ${playerLabel(vs.target)}` + (isElderRole(vs.target) ? '（被救活的长老仅拥有 1 条生命）' : '');
                 vs.status = 'saved';
                 saveNightActions(); renderConsole();
             }
+            function witchAntidoteSuicide() {
+                if (nightActions.witch.antidoteUsed) { showToast('解药已经用过了（整场仅一瓶）'); return; }
+                if (nightActions.witch.night === gameDay) { showToast('女巫本夜已经用过药了（每晚只能用一种）'); return; }
+                if (godsDisabled) { showToast('神职能力已失效，女巫无法用药'); return; }
+                const sc = nightActions.vampire.suicide;
+                if (!(sc && sc.day === gameDay && sc.status === 'pending')) { showToast('当前没有等待救治的自杀吸血鬼'); return; }
+                pushUndo('女巫救治自杀吸血鬼');
+                nightActions.witch.antidoteUsed = true; nightActions.witch.night = gameDay;
+                nightActions.witch.lastAction = `使用解药救治自杀的吸血鬼 ${playerLabel(sc.target)}`;
+                sc.status = 'saved';
+                saveNightActions();
+                revivePlayer(sc.target);
+                appendAutoLog(`🧙 女巫使用解药救治了自杀的吸血鬼 ${playerLabel(sc.target)}`);
+                renderConsole();
+            }
+            // ---------- 吸血鬼自杀 ----------
+            function suicideTonightIndex() {
+                const sc = nightActions.vampire && nightActions.vampire.suicide;
+                if (sc && sc.day === gameDay && sc.target >= 0) return sc.target;
+                return -1;
+            }
+            function activeVampireIndices() {
+                // 参与击杀人数计算的吸血鬼：排除已死亡者，并排除本夜选择自杀者（无论其是否被解药救回）
+                const s = suicideTonightIndex();
+                return vampireIndices().filter(function(i) { return !isDead(i) && i !== s; });
+            }
+            function confirmVampireSuicide(idx) {
+                if (vampireSuicideUsed) { showToast('本场自杀机会已使用'); return; }
+                if (isNaN(idx) || idx < 0 || idx >= 15) { showToast('请先选择自杀的吸血鬼'); return; }
+                if (isDead(idx)) { showToast('该玩家已经出局'); return; }
+                if (currentRoles && currentRoles[idx] !== '吸血鬼') { showToast('只有吸血鬼可以选择自杀'); return; }
+                pushUndo('吸血鬼自杀：' + playerLabel(idx));
+                if (gamePhase !== '夜晚') { gamePhase = '夜晚'; saveGameTime(); }
+                vampireSuicideUsed = true;
+                saveVampireSuicideUsed();
+                nightActions.vampire.suicide = { day: gameDay, target: idx, status: 'pending' };
+                vampParticipants.delete(idx);
+                markDead(idx, REASON_SUICIDE);
+                saveNightActions();
+                appendAutoLog(`🗡️ 吸血鬼 ${playerLabel(idx)} 选择自杀：本夜不参与击杀、不计入动手人数；本阶段结束后将跳过第${chineseDay(Math.min(MAX_DAY, gameDay + 1))}天白天、直接进入黑夜（整场仅可自杀一次，女巫可用解药救治）`);
+                finishDeathResolution();
+            }
+            function skipDayPending() {
+                const sc = nightActions.vampire && nightActions.vampire.suicide;
+                return !!(sc && sc.day === gameDay && sc.target >= 0);
+            }
+            function closeSuicideNight() {
+                const sc = nightActions.vampire && nightActions.vampire.suicide;
+                if (sc && sc.day === gameDay && sc.status === 'pending') { sc.status = 'dead'; saveNightActions(); }
+            }
+            function vampireSuicideResolve() {
+                // 女巫未使用解药 → 自杀生效（死亡已在确认自杀时记录）
+                const sc = nightActions.vampire.suicide;
+                if (!(sc && sc.day === gameDay && sc.status === 'pending')) return;
+                sc.status = 'dead';
+                saveNightActions();
+                renderConsole();
+            }
             function witchPoison() {
-                if (nightActions.witch.poisonUsed || nightActions.witch.night === gameDay || godsDisabled) return;
+                if (nightActions.witch.poisonUsed) { showToast('毒药已经用过了（整场仅一瓶）'); return; }
+                if (nightActions.witch.night === gameDay) { showToast('女巫本夜已经用过药了（每晚只能用一种）'); return; }
+                if (godsDisabled) { showToast('神职能力已失效，女巫无法用药'); return; }
                 const sel = consolePanel.querySelector('.witch-poison-target'); if (!sel) return;
-                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) return;
+                const idx = parseInt(sel.value, 10); if (isNaN(idx) || idx < 0) { showToast('请先选择毒杀目标'); return; }
+                pushUndo('女巫毒杀 ' + playerLabel(idx));
                 nightActions.witch.poisonUsed = true; nightActions.witch.night = gameDay;
                 nightActions.witch.lastAction = `使用毒药毒杀 ${playerLabel(idx)}`;
                 markDead(idx, REASON_POISON);
-                const vs = nightActions.vampire;
-                if (vs.day === gameDay && vs.status === 'pending') {
-                    const g = nightActions.guardian;
-                    if (g.night === gameDay && g.target === vs.target) vs.status = 'protected';
-                    else { markDead(vs.target, REASON_VAMPIRE); vs.status = 'killed'; }
-                }
-                saveNightActions(); finishDeathResolution();
+                saveNightActions();
+                settleVampireKill();
+                finishDeathResolution();
             }
             function seerCheck() {
-                if (nightActions.seer.night === gameDay && nightActions.seer.checked) return;
-                if (godsDisabled) return;
+                if (nightActions.seer.night === gameDay && nightActions.seer.checked) { showToast('本夜已经查验过了，如需重查请先重置预言家操作'); return; }
+                if (godsDisabled) { showToast('神职能力已失效，预言家无法查验'); return; }
                 const input = consolePanel.querySelector('.seer-search');
                 const target = resolveSeerTarget(input ? input.value : '');
-                if (target < 0) { renderConsole(); return; }
-                if (target === findRoleIndex('预言家')) { renderConsole(); return; } // 预言家无法查验自己
+                if (target < 0) { showToast('没找到这名玩家，请输入姓名或「3号」这样的格式'); renderConsole(); return; }
+                if (target === findRoleIndex('预言家')) { showToast('预言家无法查验自己'); renderConsole(); return; }
+                pushUndo('预言家查验 ' + playerLabel(target));
                 const role = currentRoles ? currentRoles[target] : '';
                 nightActions.seer.night = gameDay; nightActions.seer.checked = true; nightActions.seer.target = target; nightActions.seer.faction = seerFactionOf(role);
                 saveNightActions(); renderConsole();
             }
 
             function coupleSelectOptions(selected, exclude) { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 未选择 —</option>'; for (let i = 0; i < 15; i++) { if (i === exclude) continue; const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } return opts; }
-            function dayOptions(selected) { let opts = ''; for (let d = 1; d <= 7; d++) opts += `<option value="${d}"${selected === d ? ' selected' : ''}>第${chineseDay(d)}天</option>`; return opts; }
+            function dayOptions(selected) { let opts = ''; for (let d = 1; d <= MAX_DAY; d++) opts += `<option value="${d}"${selected === d ? ' selected' : ''}>第${chineseDay(d)}天</option>`; return opts; }
+
+            // ---------- 控制台区块折叠（状态持久化） ----------
+            const FOLDED_KEY = 'village_folded_blocks';
+            let foldedBlocks = {};
+            try { const f = JSON.parse(localStorage.getItem(FOLDED_KEY)); if (f && typeof f === 'object' && !Array.isArray(f)) foldedBlocks = f; } catch (e) {}
+            function saveFoldedBlocks() { try { localStorage.setItem(FOLDED_KEY, JSON.stringify(foldedBlocks)); } catch (e) {} }
+            function applyConsoleFolding() {
+                const blocks = Array.from(consolePanel.children).filter(function(el) { return el.classList.contains('console-block'); });
+                blocks.forEach(function(b, idx) {
+                    const title = b.querySelector('.console-block-title');
+                    if (!title) return;
+                    const label = title.textContent.trim();
+                    if (BLOCK_IDS[label]) b.id = BLOCK_IDS[label];
+                    const key = 'blk' + idx;
+                    const body = document.createElement('div');
+                    body.className = 'block-body';
+                    while (title.nextSibling) body.appendChild(title.nextSibling);
+                    b.appendChild(body);
+                    const icon = document.createElement('span');
+                    icon.className = 'fold-icon';
+                    icon.textContent = foldedBlocks[key] ? '▸' : '▾';
+                    title.appendChild(icon);
+                    title.classList.add('foldable');
+                    if (foldedBlocks[key]) body.hidden = true;
+                    title.addEventListener('click', function() {
+                        foldedBlocks[key] = !foldedBlocks[key];
+                        saveFoldedBlocks();
+                        body.hidden = !!foldedBlocks[key];
+                        icon.textContent = foldedBlocks[key] ? '▸' : '▾';
+                    });
+                });
+            }
+
+            // ---------- 轻量提示条 ----------
+            let toastTimer = null;
+            function showToast(msg) {
+                let el = document.getElementById('toastBar');
+                if (!el) {
+                    el = document.createElement('div');
+                    el.id = 'toastBar';
+                    el.className = 'toast-bar';
+                    document.body.appendChild(el);
+                }
+                el.textContent = msg;
+                el.classList.add('show');
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() { el.classList.remove('show'); }, 3200);
+            }
 
             function renderConsole() {
                 const names = parsePlayerNames(playerNamesInput.value);
@@ -980,17 +1453,22 @@
                     `<div class="cs-item">情侣：<b>${coupleText}</b></div>` +
                     `<div class="cs-item">警长：<b>${sheriffText}</b></div>` +
                     `<div class="cs-item">已施法(存活)：<b>${bewitchedAlive}</b> 人</div></div>`;
-                if (elderIdx >= 0 && !isDead(elderIdx) && elderLives < 2) html += `<div class="notice-banner">👴 长老（${playerLabel(elderIdx)}）剩余生命：<b>${elderLives}</b> 条</div>`;
-                if (godsDisabled) html += '<div class="notice-banner warn">⚠️ 长老已死亡，所有神职（女巫、预言家、猎人、守护者、丘比特）技能失效</div>';
+                if (elderIdx >= 0 && !isDead(elderIdx) && elderLives < 2) html += `<div class="notice-banner">👴 长老（${playerLabel(elderIdx)}）剩余生命：<b>${elderLives}</b> 条${elderLives === 1 ? '（被吸血鬼击杀一次，或曾被解药救活 —— 仅剩 1 条）' : ''}</div>`;
+                if (godsDisabled) { html += '<div class="notice-banner warn">⚠️ 长老因「女巫毒杀 / 猎人猎杀 / 投票处决」死亡，所有神职（女巫、预言家、猎人、守护者、丘比特）技能永久失效 —— 即使撤销长老的死亡也不会恢复</div>'; html += '<div class="action-select-row"><button class="restore-gods-btn">✨ 手动恢复神职能力</button></div>'; }
                 html += renderStatsHtml();
                 html += '</div>';
+
+                html += victoryPanelHtml();
 
                 html += '<div class="console-block"><div class="console-block-title">⏳ 流程提醒</div>';
                 html += '<div class="flow-list">' +
                     `<div class="flow-time-row">📅 游戏时间：<select class="console-day">${dayOptions(gameDay)}</select><select class="console-phase"><option value="白天"${gamePhase === '白天' ? ' selected' : ''}>白天</option><option value="夜晚"${gamePhase === '夜晚' ? ' selected' : ''}>夜晚</option></select><span class="game-time-value">第${chineseDay(gameDay)}天 · ${gamePhase}</span></div>` +
                     `<div>🌙 夜晚行动顺序：吹笛人 → 吸血鬼 / 预言家 / 守护者 → 女巫</div>` +
                     `<div>🪄 吹笛人今晚可施法 <b>${piperCount}</b> 人（${gameDay % 2 === 1 ? '奇数' : '偶数'}天）</div>` +
-                    `<div>🗳️ 第二天 12:00—14:00 为警长竞选时间</div></div></div>`;
+                    `<div>🗳️ 第二天 12:00—14:00 为警长竞选时间</div>`;
+                html += nightStepBarHtml();
+                html += '<div class="action-select-row"><button class="reset-night-btn">🌙 一键重置本夜全部操作</button></div>';
+                html += '</div></div>';
 
                 html += '<div class="console-block"><div class="console-block-title">💘 丘比特指定情侣</div>';
                 if (coupleLocked) {
@@ -1012,16 +1490,23 @@
                 let reviveOpts = '<option value="">— 选择死亡玩家 —</option>';
                 for (const i of Array.from(deadSet)) reviveOpts += `<option value="${i}">${playerLabel(i)}（${deathReason(i)}）</option>`;
                 html += '<div class="action-select-row"><select class="revive-select">' + reviveOpts + '</select><button class="revive-btn"' + (deadSet.size ? '' : ' disabled') + '>↩️ 撤销死亡</button><button class="reset-death-btn"' + (deadSet.size ? '' : ' disabled') + '>🔄 重置所有死亡</button></div>';
+                html += '<div class="action-limit">↩️ 撤销死亡不再自动回满长老生命：被吸血鬼击杀后救活的长老只有 1 条命；因毒杀 / 猎杀 / 投票处决死亡的长老，神职能力已永久失效（需修正时请用上方「✨ 手动恢复神职能力」）。</div>';
                 if (sheriffTransferPending) html += '<div class="action-select-row"><button class="manual-sheriff-btn">👑 警长未移交（点击移交）</button></div>';
                 if (hunterPending) html += '<div class="action-select-row"><button class="manual-hunter-btn">🔫 猎人未开枪（点击开枪）</button></div>';
+                else if (hunterBlockedReason) html += `<div class="action-limit">🔫 猎人已死亡但不能开枪：${hunterBlockedReason}。</div>`;
                 html += '</div>';
 
                 // 吹笛人
                 const pi = piperNightInfo();
+                const pv = victoryStatus();
+                const piperPct = pv.piperTotal > 0 ? Math.round(pv.piperDone / pv.piperTotal * 100) : 0;
                 html += '<div class="console-block"><div class="console-block-title">🪄 吹笛人施法</div>';
                 const piperPlayer = findRoleIndex('吹笛人');
                 html += `<div class="action-info">吹笛人：${piperPlayer >= 0 ? playerLabel(piperPlayer) : '未分配'}</div>`;
-                html += `<div class="action-status">已吹奏且存活：<b>${bewitchedAlive}</b> / 场上存活：<b>${aliveCount}</b></div>`;
+                html += `<div class="action-status">🎯 吹笛者胜利进度：已施法且存活 <b>${pv.piperDone}</b> / 应施法对象 <b>${pv.piperTotal}</b> 人${(piperPlayer >= 0 && isDead(piperPlayer)) ? '（吹笛人已死亡，仍有机会胜利）' : ''}</div>`;
+                html += `<div class="progress-wrap"><div class="progress-bar" style="width:${piperPct}%"></div><span class="progress-text">${piperPct}%</span></div>`;
+                if (pv.piperWin) html += '<div class="notice-banner">🏁 场上所有存活玩家均已被施法 —— 吹笛者达成胜利条件（可与其他阵营同胜）</div>';
+                if (piperPlayer >= 0 && !isDead(piperPlayer)) html += `<div class="action-status">场上存活：<b>${aliveCount}</b> 人（吹笛人不得对自己施法，不计入应施法对象）</div>`;
                 html += `<div class="action-status">今晚（第${chineseDay(gameDay)}天 · ${gameDay % 2 === 1 ? '奇数' : '偶数'}天）可施法 <b>${pi.max}</b> 人 · 本夜已施法 <b>${pi.used}</b> 人</div>`;
                 if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
                 else if (pi.remaining > 0) {
@@ -1035,24 +1520,38 @@
                 // 吸血鬼
                 const vamps = vampireIndices();
                 const aliveVamps = vamps.filter(function(v) { return !isDead(v); });
-                const minP = Math.ceil(aliveVamps.length / 2);
                 const vs = nightActions.vampire;
+                const vsc = vs.suicide || { day: 0, target: -1, status: '' };
+                const suicideIdx = suicideTonightIndex();
+                const actionVamps = activeVampireIndices();
+                const minP = Math.ceil(actionVamps.length / 2);
                 const vampIsTonight = vs.day === gameDay;
                 html += '<div class="console-block"><div class="console-block-title">🧛 吸血鬼行动</div>';
                 html += `<div class="action-info">吸血鬼（存活 ${aliveVamps.length} 人 / 共 ${vamps.length} 人）：${aliveVamps.map(function(i) { return playerLabel(i); }).join('、') || '无存活吸血鬼'}</div>`;
-                if (aliveVamps.length > 0) {
-                    html += `<div class="action-info">需至少 <b>${minP}</b> 人参与击杀（≥吸血鬼人数一半向上取整）</div>`;
+                if (vsc.day === gameDay && vsc.target >= 0) html += `<div class="action-info">🗡️ 本夜自杀：${playerLabel(vsc.target)}（${vsc.status === 'saved' ? '已被女巫解药救治，但本夜仍不得参与击杀' : vsc.status === 'dead' ? '已死亡' : '等待女巫决定是否救治'}）· 不计入动手人数 · 本阶段结束后跳过次日白天直接进入黑夜</div>`;
+                if (actionVamps.length > 0) {
+                    html += `<div class="action-info">需至少 <b>${minP}</b> 人参与击杀（≥当夜可行动吸血鬼人数一半向上取整${suicideIdx >= 0 ? '，已排除自杀者' : ''}）</div>`;
                     if (isNight) {
                         html += '<div class="vamp-participants">';
-                        for (const v of aliveVamps) html += `<label class="vamp-participant"><input type="checkbox" class="vamp-part" data-index="${v}"${vampParticipants.has(v) ? ' checked' : ''}> ${playerLabel(v)}</label>`;
+                        for (const v of actionVamps) html += `<label class="vamp-participant"><input type="checkbox" class="vamp-part" data-index="${v}"${vampParticipants.has(v) ? ' checked' : ''}> ${playerLabel(v)}</label>`;
                         html += '</div>';
-                        html += '<div class="action-select-row"><span>选择击杀：</span><select class="vamp-target">' + aliveTargetOptions(vs.target) + '</select><button class="vamp-confirm">🩸 确认击杀</button></div>';
+                        html += '<div class="action-select-row"><span>选择击杀：</span><input type="text" class="pick-search" data-target=".vamp-target" list="pickPlayers" placeholder="🔍搜索"><select class="vamp-target">' + aliveTargetOptions(vs.target) + '</select><button class="vamp-confirm">🩸 确认击杀</button></div>';
                     } else html += '<div class="action-limit">需切换至夜晚才能行动</div>';
                     if (vampIsTonight && vs.status === 'pending') { html += `<div class="action-result">今晚已选择击杀 ${playerLabel(vs.target)}（参与者：${(vs.participants || []).map(function(i) { return playerLabel(i); }).join('、')}）· 待女巫决定是否解救</div>`; html += '<div class="action-select-row"><button class="vamp-resolve">⚖️ 女巫未解救，确认击杀生效</button></div>'; }
                     else if (vampIsTonight && vs.status === 'saved') html += `<div class="action-result">今晚击杀 ${playerLabel(vs.target)} 已被女巫解药解救</div>`;
                     else if (vampIsTonight && vs.status === 'protected') html += `<div class="action-result">今晚击杀 ${playerLabel(vs.target)} 已被守护者保护，未死亡</div>`;
                     else if (vampIsTonight && vs.status === 'killed') html += `<div class="action-result">今晚已击杀 ${playerLabel(vs.target)}</div>`;
-                } else html += '<div class="action-result">无存活吸血鬼，无法行动</div>';
+                    else if (vampIsTonight && vs.status === 'elder_lives') html += `<div class="action-result">👴 今晚击杀 ${playerLabel(vs.target)}（长老）只打掉一条生命：长老未死亡，女巫无从得知、也无需使用解药</div>`;
+                } else html += '<div class="action-result">本夜没有可参与击杀的吸血鬼</div>';
+                if (isNight && !vampireSuicideUsed && aliveVamps.length > 0) {
+                    let sopts = '';
+                    for (const v of aliveVamps) sopts += `<option value="${v}">${playerLabel(v)}</option>`;
+                    html += '<div class="action-select-row"><span>🗡️ 吸血鬼自杀：</span><input type="text" class="pick-search" data-target=".vamp-suicide-target" list="pickPlayers" placeholder="🔍搜索"><select class="vamp-suicide-target">' + sopts + '</select><button class="vamp-suicide-btn">🗡️ 确认自杀</button></div>';
+                    html += '<div class="action-limit">自杀只需本人决定，不要求达到动手人数下限；自杀者本夜不得参与击杀、不计入动手人数，随后立刻跳过次日白天直接进入黑夜，整场仅可自杀一次，且女巫可用解药救治。</div>';
+                } else if (vampireSuicideUsed) {
+                    html += `<div class="action-result">🗡️ 本场自杀机会已使用${vsc.target >= 0 ? `：${playerLabel(vsc.target)}（${vsc.status === 'saved' ? '已被女巫解药救治' : '已死亡'}）` : ''}</div>`;
+                }
+                if (vsc.day === gameDay && vsc.status === 'pending') html += '<div class="action-select-row"><button class="vamp-suicide-resolve">⚖️ 女巫未救治，确认自杀生效</button></div>';
                 html += '<div class="action-select-row"><button class="reset-vamp-btn">🔄 重置吸血鬼操作</button></div>';
                 html += '</div>';
 
@@ -1066,7 +1565,7 @@
                 html += '<div class="action-status">每晚守护一名角色（含自己），被守护者当晚免疫吸血鬼击杀；不得连续两晚守护同一人</div>';
                 if (godsDisabled) html += '<div class="action-limit">神职技能已失效</div>';
                 else if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
-                else html += '<div class="action-select-row"><select class="guard-target">' + guardTargetOptions(guardianPrev) + '</select><button class="guard-confirm"' + (guardianIsTonight ? ' disabled' : '') + '>🛡️ 确认守护</button></div>';
+                else html += '<div class="action-select-row"><input type="text" class="pick-search" data-target=".guard-target" list="pickPlayers" placeholder="🔍搜索"><select class="guard-target">' + guardTargetOptions(guardianPrev) + '</select><button class="guard-confirm"' + (guardianIsTonight ? ' disabled' : '') + '>🛡️ 确认守护</button></div>';
                 if (guardianIsTonight) html += `<div class="action-result">本夜守护：${playerLabel(g.target)}</div>`;
                 if (guardianPrev >= 0) html += `<div class="action-result">上一晚守护：${playerLabel(guardianPrev)}（今晚不可再守护）</div>`;
                 html += '<div class="action-select-row"><button class="reset-guard-btn">🔄 重置守护者操作</button></div></div>';
@@ -1084,7 +1583,11 @@
                 html += '<datalist id="seerDatalist">';
                 for (let i = 0; i < 15; i++) { if (i === seerPlayer) continue; html += `<option value="${playerLabel(i)}">`; }
                 html += '</datalist>';
+                html += '<datalist id="pickPlayers">';
+                for (let i = 0; i < 15; i++) html += `<option value="${playerLabel(i)}">`;
+                html += '</datalist>';
                 html += `<div class="action-result">查验结果：${s.faction ? `${playerLabel(s.target)} → ${s.faction}` : '尚未查验'}</div>`;
+                if (s.faction) html += `<div class="action-limit">📢 向预言家播报（不含括号）：「${playerLabel(s.target)} 是 ${String(s.faction).split('（')[0]}」—— 括号内的真实身份仅供主持人记录，请勿播报。</div>`;
                 html += '<div class="action-select-row"><button class="reset-seer-btn">🔄 重置预言家操作</button></div></div>';
 
                 // 女巫
@@ -1092,22 +1595,43 @@
                 const witchActedTonight = (w.night === gameDay);
                 const antidoteTarget = (vampIsTonight && vs.status === 'pending') ? vs.target : -1;
                 const guardianProtectedTarget = (g.night === gameDay && antidoteTarget >= 0 && g.target === antidoteTarget);
-                const canAntidote = isNight && !w.antidoteUsed && !witchActedTonight && antidoteTarget >= 0 && !godsDisabled && !guardianProtectedTarget && !(currentRoles && currentRoles[antidoteTarget] === '长老' && elderLives === 2);
+                const canAntidote = isNight && !w.antidoteUsed && !witchActedTonight && antidoteTarget >= 0 && !godsDisabled && !guardianProtectedTarget && !(isElderRole(antidoteTarget) && elderLives === 2);
+                const ws = vs.suicide || { day: 0, target: -1, status: '' };
+                const suicidePending = (ws.day === gameDay && ws.status === 'pending' && ws.target >= 0);
+                const canAntidoteSuicide = isNight && !w.antidoteUsed && !witchActedTonight && !godsDisabled && suicidePending;
                 const canPoison = isNight && !w.poisonUsed && !witchActedTonight && !godsDisabled;
                 html += '<div class="console-block"><div class="console-block-title">🧙 女巫行动</div>';
                 const witchPlayer = findRoleIndex('女巫');
                 html += `<div class="action-info">女巫：${witchPlayer >= 0 ? playerLabel(witchPlayer) : '未分配'}</div>`;
                 html += `<div class="action-status">解药：${w.antidoteUsed ? '已使用' : '未使用'} · 毒药：${w.poisonUsed ? '已使用' : '未使用'}</div>`;
                 html += '<div class="action-select-row"><button class="witch-antidote"' + (canAntidote ? '' : ' disabled') + '>💊 使用解药（解救 ' + (antidoteTarget >= 0 ? playerLabel(antidoteTarget) : '吸血鬼击杀目标') + '）</button></div>';
+                if (suicidePending) html += '<div class="action-select-row"><button class="witch-antidote-suicide"' + (canAntidoteSuicide ? '' : ' disabled') + '>💊 使用解药（救治自杀的吸血鬼 ' + playerLabel(ws.target) + '）</button></div>';
+                if (antidoteTarget >= 0 && isElderRole(antidoteTarget) && elderLives === 1) html += '<div class="action-limit">👴 被救活的长老仅拥有 1 条生命。</div>';
                 if (guardianProtectedTarget) html += '<div class="action-limit">被守护者保护的目标无需解药</div>';
-                html += '<div class="action-select-row"><select class="witch-poison-target"' + (canPoison ? '' : ' disabled') + '>' + aliveTargetOptions() + '</select><button class="witch-poison"' + (canPoison ? '' : ' disabled') + '>☠️ 使用毒药</button></div>';
+                html += '<div class="action-select-row"><input type="text" class="pick-search" data-target=".witch-poison-target" list="pickPlayers" placeholder="🔍搜索"><select class="witch-poison-target"' + (canPoison ? '' : ' disabled') + '>' + aliveTargetOptions() + '</select><button class="witch-poison"' + (canPoison ? '' : ' disabled') + '>☠️ 使用毒药</button></div>';
                 html += `<div class="action-result">最近行动：${w.lastAction || '无'}</div>`;
                 if (!isNight) html += '<div class="action-limit">需切换至夜晚才能行动</div>';
                 html += '<div class="action-select-row"><button class="night-summary-btn">📝 一键写入整夜总结</button><button class="reset-witch-btn">🔄 重置女巫操作</button></div>';
-                if (isNight) html += '<div class="action-select-row"><button class="advance-night-btn"' + (gameDay >= 7 ? ' disabled' : '') + '>🌅 进入下一阶段</button></div>';
+                if (isNight) html += '<div class="action-select-row"><button class="advance-night-btn"' + (gameDay >= MAX_DAY ? ' disabled' : '') + '>' + (skipDayPending() ? `⏭️ 跳过第${chineseDay(Math.min(MAX_DAY, gameDay + 1))}天白天，直接进入黑夜` : '🌅 进入下一阶段') + '</button></div>';
                 html += '</div>';
 
+                const keepScroll = window.scrollY;
+                const active = document.activeElement;
+                const isTextInput = active && consolePanel.contains(active) && (active.tagName === 'TEXTAREA' || (active.tagName === 'INPUT' && ['text', 'search', 'number', 'password'].indexOf(active.type) >= 0));
+                let keepFocus = null;
+                if (isTextInput) {
+                    const cls = String(active.className || '').split(' ')[0];
+                    const siblings = Array.from(consolePanel.querySelectorAll('.' + cls));
+                    keepFocus = { cls: cls, idx: siblings.indexOf(active), val: active.value };
+                }
                 consolePanel.innerHTML = html;
+                applyConsoleFolding();
+                if (keepFocus && keepFocus.cls) {
+                    const el = consolePanel.querySelectorAll('.' + keepFocus.cls)[keepFocus.idx];
+                    if (el) { el.value = keepFocus.val; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+                }
+                syncCounterDice();
+                window.scrollTo(0, keepScroll);
             }
 
             function renderPlayerConsole() {
@@ -1126,7 +1650,8 @@
                     if (pd) {
                         html += `<div class="d-tags">💀 ${pd.reason} · ${pd.time}</div>` +
                             `<div class="d-role">身份：${pd.revealedRole || '未公布'}</div>` +
-                            `<select class="player-reveal" data-index="${i}"><option value="">— 公布身份 —</option>${roleOptions(pd.revealedRole)}</select>`;
+                            `<select class="player-reveal" data-index="${i}"><option value="">— 公布身份 —</option>${roleOptions(pd.revealedRole)}</select>` +
+                            `<button class="player-undo-death" data-index="${i}">↩️ 撤销死亡</button>`;
                     } else {
                         html += `<div class="d-tags">✅ 存活</div>` +
                             `<button class="player-death-btn" data-index="${i}">💀 死亡</button>`;
@@ -1136,10 +1661,15 @@
                 html += '</div>';
                 playerViewPanel.innerHTML = html;
             }
+            function resetPublicDeaths() { publicDeaths = {}; savePublicDeaths(); renderPlayerConsole(); }
+            resetPublicDeathsBtn.addEventListener('click', resetPublicDeaths);
 
             consolePanel.addEventListener('click', function(e) {
+                const chip = e.target.closest('.step-chip');
+                if (chip) { jumpToBlock(chip.getAttribute('data-jump')); return; }
                 const btn = e.target.closest('button'); if (!btn) return;
                 if (btn.classList.contains('piper-add')) piperAdd();
+                else if (btn.classList.contains('reset-night-btn')) resetNightActions();
                 else if (btn.classList.contains('piper-confirm')) showPiperConfirm();
                 else if (btn.classList.contains('vamp-confirm')) showVampConfirm();
                 else if (btn.classList.contains('vamp-resolve')) resolveVampireKill();
@@ -1147,6 +1677,10 @@
                 else if (btn.classList.contains('witch-poison')) witchPoison();
                 else if (btn.classList.contains('seer-check')) seerCheck();
                 else if (btn.classList.contains('revive-btn')) doRevive();
+                else if (btn.classList.contains('restore-gods-btn')) restoreGodPowers();
+                else if (btn.classList.contains('vamp-suicide-btn')) showSuicideConfirm();
+                else if (btn.classList.contains('vamp-suicide-resolve')) vampireSuicideResolve();
+                else if (btn.classList.contains('witch-antidote-suicide')) witchAntidoteSuicide();
                 else if (btn.classList.contains('reset-death-btn')) { resetDeathModal.classList.remove('hidden'); }
                 else if (btn.classList.contains('reset-piper-btn')) resetPiper();
                 else if (btn.classList.contains('reset-vamp-btn')) resetVampire();
@@ -1179,6 +1713,9 @@
             vampConfirmYes.addEventListener('click', vampConfirmShot);
             vampConfirmNo.addEventListener('click', function() { vampConfirmModal.classList.add('hidden'); });
             vampConfirmModal.addEventListener('click', function(e) { if (e.target === vampConfirmModal) vampConfirmModal.classList.add('hidden'); });
+            suicideConfirmYes.addEventListener('click', function() { suicideConfirmModal.classList.add('hidden'); const idx = pendingSuicideIndex; pendingSuicideIndex = -1; confirmVampireSuicide(idx); });
+            suicideConfirmNo.addEventListener('click', function() { suicideConfirmModal.classList.add('hidden'); pendingSuicideIndex = -1; });
+            suicideConfirmModal.addEventListener('click', function(e) { if (e.target === suicideConfirmModal) { suicideConfirmModal.classList.add('hidden'); pendingSuicideIndex = -1; } });
             hunterConfirm.addEventListener('click', hunterConfirmShot);
             hunterCancel.addEventListener('click', function() { hunterModal.classList.add('hidden'); });
             hunterModal.addEventListener('click', function(e) { if (e.target === hunterModal) hunterModal.classList.add('hidden'); });
@@ -1193,11 +1730,20 @@
             advanceDayModal.addEventListener('click', function(e) { if (e.target === advanceDayModal) advanceDayModal.classList.add('hidden'); });
             advanceDayBtn.addEventListener('click', showAdvanceDayModal);
             playerViewPanel.addEventListener('click', function(e) {
-                const btn = e.target.closest('.player-death-btn');
-                if (!btn) return;
-                pendingPlayerDeathIndex = parseInt(btn.getAttribute('data-index'), 10);
-                playerDeathReason.value = '投票处决';
-                playerDeathModal.classList.remove('hidden');
+                const deathBtn = e.target.closest('.player-death-btn');
+                if (deathBtn) {
+                    pendingPlayerDeathIndex = parseInt(deathBtn.getAttribute('data-index'), 10);
+                    playerDeathReason.value = '投票处决';
+                    playerDeathModal.classList.remove('hidden');
+                    return;
+                }
+                const undoBtn = e.target.closest('.player-undo-death');
+                if (undoBtn) {
+                    const idx = parseInt(undoBtn.getAttribute('data-index'), 10);
+                    delete publicDeaths[idx];
+                    savePublicDeaths();
+                    renderPlayerConsole();
+                }
             });
             playerViewPanel.addEventListener('change', function(e) {
                 if (e.target.classList.contains('player-reveal')) {
@@ -1221,15 +1767,128 @@
             playerDeathCancel.addEventListener('click', function() { playerDeathModal.classList.add('hidden'); pendingPlayerDeathIndex = -1; });
             playerDeathModal.addEventListener('click', function(e) { if (e.target === playerDeathModal) playerDeathModal.classList.add('hidden'); });
             resetDeathYes.addEventListener('click', function() { resetDeathModal.classList.add('hidden'); resetAllDeaths(); });
+            elderReviveYes.addEventListener('click', function() { elderReviveModal.classList.add('hidden'); const idx = pendingElderReviveIndex; pendingElderReviveIndex = -1; if (idx >= 0) applyRevive(idx); });
+            elderReviveNo.addEventListener('click', function() { elderReviveModal.classList.add('hidden'); pendingElderReviveIndex = -1; });
+            elderReviveModal.addEventListener('click', function(e) { if (e.target === elderReviveModal) { elderReviveModal.classList.add('hidden'); pendingElderReviveIndex = -1; } });
             resetDeathNo.addEventListener('click', function() { resetDeathModal.classList.add('hidden'); });
             resetDeathModal.addEventListener('click', function(e) { if (e.target === resetDeathModal) resetDeathModal.classList.add('hidden'); });
             resetHostBtn.addEventListener('click', function() { resetHostModal.classList.remove('hidden'); });
+
+            // ================= 主持人：结算与导出 =================
+            const settleBtn = document.getElementById('settleBtn');
+            const settleModal = document.getElementById('settleModal');
+            const settleSummary = document.getElementById('settleSummary');
+            const settleExport = document.getElementById('settleExport');
+            const settleDownload = document.getElementById('settleDownload');
+            const settleCopy = document.getElementById('settleCopy');
+            const settleClose = document.getElementById('settleClose');
+            const VAMP_STATUS_TEXT = { pending: '待女巫决定', killed: '击杀生效', protected: '被守护者保护', saved: '被女巫解药解救', elder_lives: '长老仅损失一条命、未死亡', dead: '已生效' };
+            function buildExportText() {
+                const names = parsePlayerNames(playerNamesInput.value);
+                const lines = [];
+                lines.push('【鬼村对局记录】');
+                lines.push(`导出时间：${new Date().toLocaleString()}`);
+                lines.push(`游戏时间：第${chineseDay(gameDay)}天${gamePhase}（天数上限 ${MAX_DAY}）`);
+                lines.push('');
+                lines.push('—— 身份分配 ——');
+                for (let i = 0; i < 15; i++) {
+                    const role = currentRoles ? currentRoles[i] : '未分配';
+                    const nm = names[i] ? `（${names[i]}）` : '';
+                    const tags = [];
+                    if (i === voteSheriff) tags.push('👑警长');
+                    if (i === coupleA || i === coupleB) tags.push('💘情侣');
+                    if (bewitchedSet.has(i)) tags.push('🎶已施法');
+                    if (currentRoles && currentRoles[i] === '长老') tags.push(`长老生命${elderLives}条`);
+                    if (isDead(i)) tags.push(`💀${deathReason(i)}@${deathTimes[i] || '未知时间'}`);
+                    else tags.push('✅存活');
+                    lines.push(`${i + 1}号${nm} · ${role} · ${tags.join(' / ')}`);
+                }
+                lines.push('');
+                lines.push('—— 全局状态 ——');
+                lines.push(`情侣：${(coupleA >= 0 && coupleB >= 0) ? `${playerLabel(coupleA)} ↔ ${playerLabel(coupleB)}` : '未指定'}${coupleLocked ? '（已锁定）' : ''}`);
+                lines.push(`警长：${voteSheriff >= 0 ? playerLabel(voteSheriff) : '未选出'}`);
+                lines.push(`神职能力：${godsDisabled ? '已永久失效（长老特殊死亡）' : '正常'}`);
+                lines.push(`吸血鬼自杀：${vampireSuicideUsed ? '本场已使用' : '未使用'}`);
+                lines.push(`吹笛人施法名单：${Array.from(bewitchedSet).map(function(i) { return playerLabel(i); }).join('、') || '无'}`);
+                lines.push(`警长移交：${sheriffTransfers.length ? sheriffTransfers.map(function(t) { return `${playerLabel(t.from)} → ${playerLabel(t.to)}（${t.time}）`; }).join('；') : '无'}`);
+                lines.push('');
+                lines.push('—— 胜利条件判定 ——');
+                const v = victoryStatus();
+                lines.push(`好人阵营（杀死所有吸血鬼）：${v.goodWin ? '【已达成】' : '未达成'}（存活吸血鬼 ${v.counts.vampire} 人）`);
+                lines.push(`吸血鬼阵营（杀死所有普通村民 或 所有神职（不含丘比特））：${v.vampireWin ? '【已达成】' : '未达成'}（存活普通村民 ${v.counts.villager} 人 · 存活神职 ${v.counts.god} 人）`);
+                lines.push(`吹笛者（场上所有存活玩家均被施法）：${v.piperWin ? '【已达成】' : '未达成'}（${v.piperDone} / ${v.piperTotal}）`);
+                lines.push(`情侣方：${v.coupleReached ? '【已达成】' : '未达成'} —— ${v.coupleText}（丘比特与情侣方共享胜利条件）`);
+                if (v.any) lines.push('※ 已有阵营满足胜利条件，可由主持人宣布结束，获胜阵营全员复活、失败方留在魔方空间。');
+                lines.push('');
+                lines.push('—— 夜间行动记录（最近一次）——');
+                const vs = nightActions.vampire;
+                lines.push(`吸血鬼：第${chineseDay(vs.day || 1)}天 目标 ${vs.target >= 0 ? playerLabel(vs.target) : '无'}${vs.status ? `（${VAMP_STATUS_TEXT[vs.status] || vs.status}）` : ''} · 动手：${(vs.participants || []).map(function(i) { return playerLabel(i); }).join('、') || '无'}`);
+                if (vs.suicide && vs.suicide.target >= 0) lines.push(`吸血鬼自杀：第${chineseDay(vs.suicide.day || 1)}天 ${playerLabel(vs.suicide.target)}（${VAMP_STATUS_TEXT[vs.suicide.status] || vs.suicide.status}）`);
+                lines.push(`预言家：第${chineseDay(nightActions.seer.night || 1)}天 ${(nightActions.seer.checked && nightActions.seer.target >= 0) ? playerLabel(nightActions.seer.target) + ' → ' + nightActions.seer.faction : '未查验'}`);
+                lines.push(`守护者：第${chineseDay(nightActions.guardian.night || 1)}天 ${nightActions.guardian.target >= 0 ? playerLabel(nightActions.guardian.target) : '未守护'}`);
+                lines.push(`女巫：解药${nightActions.witch.antidoteUsed ? '已用' : '未用'} · 毒药${nightActions.witch.poisonUsed ? '已用' : '未用'} · 最近：${nightActions.witch.lastAction || '无'}`);
+                lines.push(`吹笛人：第${chineseDay(nightActions.piper.day || 1)}天 施法 ${(nightActions.piper.targets || []).map(function(i) { return playerLabel(i); }).join('、') || '无'}`);
+                lines.push('');
+                lines.push('—— 投票记录（当前一轮）——');
+                for (let i = 0; i < 15; i++) {
+                    if (isDead(i)) { lines.push(`${playerLabel(i)}：已出局`); continue; }
+                    const t = voteVotes[i];
+                    lines.push(`${playerLabel(i)} → ${(t >= 0 && t < 15) ? playerLabel(t) + ((i === voteSheriff && !sheriffElectionMode) ? '（警长计 2 票）' : '') : '弃票'}`);
+                }
+                lines.push('');
+                lines.push('—— 村中日志 ——');
+                const logs = loadVillageLogs();
+                if (!logs.length) lines.push('（无）');
+                for (const l of logs) lines.push(`[${l.time}] ${l.text}`);
+                return lines.join('\n');
+            }
+            function renderSettleSummary() {
+                const v = victoryStatus();
+                const mark = function(b) { return b ? '<span class="ok">已达成</span>' : '<span class="no">未达成</span>'; };
+                let html = '';
+                html += `<div>👥 存活 <b>${v.alive.length}</b> / 15 · 好人 <b>${v.counts.villager + v.counts.god}</b> 人 · 吸血鬼 <b>${v.counts.vampire}</b> 人 · 中立 <b>${v.counts.neutral}</b> 人</div>`;
+                html += `<div>🏡 好人阵营（杀死所有吸血鬼）：${mark(v.goodWin)}</div>`;
+                html += `<div>🧛 吸血鬼阵营（杀死所有普通村民 或 所有神职（不含丘比特））：${mark(v.vampireWin)}</div>`;
+                html += `<div>🪄 吹笛者（场上所有存活玩家均被施法 ${v.piperDone}/${v.piperTotal}）：${mark(v.piperWin)}</div>`;
+                html += `<div>💘 情侣方（${v.coupleText}）：${mark(v.coupleReached)}</div>`;
+                html += `<div class="ref-tip">※ 本工具不会自动结束游戏，胜负由主持人宣布；下方为完整对局记录，可下载或复制用于复盘。</div>`;
+                settleSummary.innerHTML = html;
+            }
+            function openSettleModal() {
+                renderSettleSummary();
+                settleExport.value = buildExportText();
+                settleModal.classList.remove('hidden');
+            }
+            function downloadExport() {
+                const text = settleExport.value || buildExportText();
+                const blob = new Blob(['\ufeff' + text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `鬼村对局记录_第${gameDay}天${gamePhase}_${new Date().toISOString().slice(0, 10)}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+            }
+            function copyExport() {
+                const text = settleExport.value;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function() { settleSummary.insertAdjacentHTML('beforeend', '<div class="ref-tip">📋 已复制到剪贴板。</div>'); }, function() { settleExport.removeAttribute('readonly'); settleExport.select(); });
+                } else { settleExport.removeAttribute('readonly'); settleExport.select(); }
+            }
+            settleBtn.addEventListener('click', openSettleModal);
+            settleClose.addEventListener('click', function() { settleModal.classList.add('hidden'); });
+            settleModal.addEventListener('click', function(e) { if (e.target === settleModal) settleModal.classList.add('hidden'); });
+            settleDownload.addEventListener('click', downloadExport);
+            settleCopy.addEventListener('click', copyExport);
             resetHostYes.addEventListener('click', function() { resetHostModal.classList.add('hidden'); resetHostBoard(); });
             resetHostNo.addEventListener('click', function() { resetHostModal.classList.add('hidden'); });
             resetHostModal.addEventListener('click', function(e) { if (e.target === resetHostModal) resetHostModal.classList.add('hidden'); });
 
             (function initNightState() {
                 nightActions = loadNightActions();
+                vampireSuicideUsed = loadVampireSuicideUsed();
                 const loaded = loadBewitched(); bewitchedSet.clear(); loaded.forEach(function(i) { bewitchedSet.add(i); });
                 const piper = getPiperIndex(); if (piper >= 0) bewitchedSet.delete(piper);
                 sheriffTransfers = loadSheriffTransfers();
@@ -1250,11 +1909,337 @@
                     const roll = Math.floor(Math.random() * faces) + 1;
                     const total = roll + mod;
                     diceResultDiv.innerHTML = mod > 0 ? `🎲 1d${faces} + ${mod} = ${roll} + ${mod} = <b>${total}</b>` : `🎲 1d${faces} = <b>${roll}</b>`;
+                    pushDiceHistory();
                 });
             });
 
+            // ---------- 吸血鬼反击判定 ----------
+            const counterVampCount = document.getElementById('counterVampCount');
+            const counterVampTotal = document.getElementById('counterVampTotal');
+            const counterVictimTotal = document.getElementById('counterVictimTotal');
+            const counterAutoBtn = document.getElementById('counterAutoBtn');
+            const counterManualBtn = document.getElementById('counterManualBtn');
+            const counterLogBtn = document.getElementById('counterLogBtn');
+            const counterResultDiv = document.getElementById('counterResult');
+            const counterHint = document.getElementById('counterHint');
+            let counterCountDirty = false;
+            let lastCounter = null;
+            counterVampCount.addEventListener('input', function() { counterCountDirty = true; });
+            function currentVampireActionCount() {
+                const vs = nightActions.vampire;
+                if (vs && vs.day === gameDay && (vs.participants || []).length) return vs.participants.length;
+                if (vampParticipants.size) return vampParticipants.size;
+                return 0;
+            }
+            function syncCounterDice() {
+                if (!counterCountDirty) { const n = currentVampireActionCount(); if (n > 0) counterVampCount.value = n; }
+                const vs = nightActions.vampire;
+                if (vs && vs.day === gameDay && vs.status === 'protected') counterHint.textContent = '⚠️ 本夜击杀目标已被守护者保护、未确认死亡 —— 按规则无需进行反击判定。';
+                else if (vs && vs.day === gameDay && vs.status === 'saved') counterHint.textContent = '⚠️ 本夜击杀目标已被女巫解药救治、未确认死亡 —— 按规则无需进行反击判定。';
+                else if (vs && vs.day === gameDay && vs.status === 'elder_lives') counterHint.textContent = '👴 本夜目标是长老、只损失一条生命且未死亡 —— 按规则无需进行反击判定。';
+                else counterHint.textContent = '';
+            }
+            function judgeCounter(vampTotal, victimTotal, lines) {
+                const success = vampTotal < victimTotal;
+                const verdict = success
+                    ? '⚔️ <b>反击成功</b>：受害者必定留下 <b>1 条反击线索</b>，同时 <b>增加 1 条吸血鬼线索</b>（受害者可自由选择反击方式）。'
+                    : '🛡️ <b>反击失败</b>：受害者未能留下反击线索，线索按原流程给出。';
+                counterResultDiv.innerHTML = lines.join('<br>') + `<br>吸血鬼总点数 <b>${vampTotal}</b> vs 受害者点数 <b>${victimTotal}</b> → ${verdict}`;
+                lastCounter = { vampTotal: vampTotal, victimTotal: victimTotal, success: success };
+                counterLogBtn.hidden = false;
+                pushDiceHistory();
+            }
+            function counterAutoJudge() {
+                let n = parseInt(counterVampCount.value, 10);
+                if (isNaN(n) || n < 1) n = 1;
+                n = Math.min(15, n);
+                counterVampCount.value = n;
+                const rolls = []; let sum = 0;
+                for (let i = 0; i < n; i++) { const r = Math.floor(Math.random() * 6) + 1; rolls.push(r); sum += r; }
+                const faces = n * 6;
+                const victim = Math.floor(Math.random() * faces) + 1;
+                counterVampTotal.value = sum; counterVictimTotal.value = victim;
+                judgeCounter(sum, victim, [
+                    `🧛 参与击杀的吸血鬼 ${n} 人，各掷 1d6：${rolls.join(' + ')} = <b>${sum}</b>`,
+                    `🧍 受害者掷 1d${faces}（行动吸血鬼人数 ${n} × 6）= <b>${victim}</b>`
+                ]);
+            }
+            function counterManualJudge() {
+                let a = parseInt(counterVampTotal.value, 10); if (isNaN(a) || a < 0) a = 0;
+                let b = parseInt(counterVictimTotal.value, 10); if (isNaN(b) || b < 0) b = 0;
+                judgeCounter(a, b, ['✍️ 手动录入点数：']);
+            }
+            function counterWriteLog() {
+                if (!lastCounter) return;
+                appendAutoLog(`【反击判定】吸血鬼总点数 ${lastCounter.vampTotal} vs 受害者点数 ${lastCounter.victimTotal} → ${lastCounter.success ? '反击成功：受害者留下 1 条反击线索，并增加 1 条吸血鬼线索' : '反击失败：受害者未能留下反击线索'}`);
+                counterResultDiv.innerHTML += '<br>📝 已写入村中日志。';
+            }
+            counterAutoBtn.addEventListener('click', counterAutoJudge);
+            counterManualBtn.addEventListener('click', counterManualJudge);
+            counterLogBtn.addEventListener('click', counterWriteLog);
+
+            // ---------- 线索条数：1d2 + 3 ----------
+            const clueCountBtn = document.getElementById('clueCountBtn');
+            clueCountBtn.addEventListener('click', function() {
+                const r = Math.floor(Math.random() * 2) + 1;
+                const total = r + 3;
+                diceResultDiv.innerHTML = `🔍 线索条数：1d2 + 3 = ${r} + 3 = <b>${total}</b> 条（规则书：完成击杀后，小魔方根据动手成员与杀人描述给出 1d2+3 条线索，线索可重复）`;
+                pushDiceHistory();
+            });
+            syncCounterDice();
+
+            // ================= 参考：魔法系别速查（供玩家与主持人查阅） =================
+            const MAGIC_REF_ROWS = [
+                ['火系', '可以形成并操控自然火焰：小型火苗、大型火焰到一定的塑形火焰均可（如火环等）。火焰能够自然熄灭。', ''],
+                ['水系', '可以形成并操控水：水滴、水雾、水球、水流均可。', ''],
+                ['草系', '可以形成并操控植物，包括植物生长、枯萎等。可以清除黑魔法痕迹。', '植物种类需在角色表格内具体填写，最多 3 种；可以操控幻想植物，但需写明设定。'],
+                ['光系', '可以形成光，光能造成灼烧、刺目等现实存在的效果，也可以清除黑魔法痕迹。', ''],
+                ['冰系', '可以形成并操控冰：不定型冰或定型冰（冰锥、冰锤、冰刃等）均可。冰会自然融化。', ''],
+                ['虫系', '可以召唤和操控昆虫。', '昆虫种类需具体填写，最多 3 种；蜘蛛按洛克王国设定也可纳入虫系。'],
+                ['电系', '可以形成并操控自然雷和电。可以清除黑魔法痕迹。', ''],
+                ['翼系', '可以形成并操控自然风，包括不定型风和定型风（风刃、龙卷风等）。', ''],
+                ['毒系', '可以形成各种毒素。', '毒素种类需具体填写，最多 3 种；可以使用幻想毒素，但需写明设定。'],
+                ['土系 & 石系', '可以形成和操控自然沙石，包括沙子、小石子或大型石块等。', ''],
+                ['武系', '有着强大的肉体力量，可以做到空手物理击杀。肉体强度与钢铁类似。', ''],
+                ['普通系', '宠物可以得到两个技能。', '也可以有更有趣的设定！'],
+                ['机械系', '可以额外携带一只机械系宠物。且机械系宠物免疫中毒、剧毒伤害。', '也可以有更有趣的设定！'],
+                ['幽灵系', '可以低空悬浮，可以使用诅咒。', '诅咒种类需具体填写，最多 2 种；可以使用幻想诅咒，但需写明设定。'],
+                ['萌系', '可以对目标进行精神干扰，诱使对方进行自杀。可以清除黑魔法痕迹。', ''],
+                ['龙系', '可以额外携带一只龙系宠物。', '也可以有更有趣的设定！'],
+                ['恶魔系', '可以生成并操纵恶魔火。恶魔火只会灼烧生物，无法自然熄灭，可被收回。', '受害者有一定几率表现为：皮肤大块黑斑、身体干瘪（血液被烧干）、表情狰狞扭曲、场地内低温。'],
+                ['黑魔法', '恶魔系 + 幽灵系效果。', '使用后有 70% 概率留下黑魔法气息，可被光系、草系、萌系和电系抵消。']
+            ];
+            function renderMagicRef() {
+                let body = '<details class="ref-section"><summary>📖 魔法系别速查（点击展开）</summary><div class="ref-table">';
+                for (const r of MAGIC_REF_ROWS) body += `<div class="ref-row"><span class="ref-name">${r[0]}</span>：${r[1]}${r[2] ? `<span class="ref-note">备注：${r[2]}</span>` : ''}</div>`;
+                body += '</div><div class="ref-tip">' +
+                    '<b>装备上限</b>：洛克角色「手持物」可装备 0–2 种魔法、「魔法」可装备 1 种魔法、携带的宠物只能装备 1 种技能（一名角色最多使用 4 种系别魔法，同时可以使用物理攻击）；宠物角色「手持物」只能装备与自身系别相同的魔法、「魔法」可装备 2 种技能、无法携带宠物。<br>' +
+                    '<b>飞行与脚印</b>：长有翅膀的洛克都可以飞行，幽灵系魔法师或特殊设定者（幽灵、悬浮等）无须接触地面；宠物是否会留下脚印参考立绘（有翅膀、无腿、悬浮等）。设定并非共识或存在歧义时，请在角色表格「备注」注明。<br>' +
+                    '<b>势力人数</b>（15 人局）：恩佐势力、暗黑圣母势力、王国相关势力各不超过 4 人，中立角色不超过 3 人。势力 ≠ 阵营。<br>' +
+                    '<b>肉体强度</b>：吸血鬼行动时所有角色肉体强度相同，不因精灵王或普通洛克而存在差异。' +
+                    '</div></details>';
+                const host = document.getElementById('hostMagicRef'); if (host) host.innerHTML = body;
+                const player = document.getElementById('playerMagicRef'); if (player) player.innerHTML = body;
+            }
+            renderMagicRef();
+
+            // ================= 夜晚步骤条 =================
+            const BLOCK_IDS = {
+                '📊 汇总': 'blk-summary',
+                '🏁 胜利条件（供主持人判断，不会自动结束游戏）': 'blk-victory',
+                '⏳ 流程提醒': 'blk-flow',
+                '💘 丘比特指定情侣': 'blk-couple',
+                '💀 死亡标记': 'blk-death',
+                '🪄 吹笛人施法': 'blk-piper',
+                '🧛 吸血鬼行动': 'blk-vamp',
+                '🛡️ 守护者行动': 'blk-guard',
+                '👁️ 预言家行动': 'blk-seer',
+                '🧙 女巫行动': 'blk-witch'
+            };
+            function stepChip(state, text, jump) {
+                const icon = state === 'done' ? '✅' : (state === 'skip' ? '➖' : '⏳');
+                return `<span class="step-chip ${state}" data-jump="${jump}">${icon} ${text}</span>`;
+            }
+            function nightStepBarHtml() {
+                if (gamePhase !== '夜晚') return '<div class="step-bar">' + stepChip('skip', '白天阶段：发言 → 投票 → 进入黑夜', 'blk-flow') + '</div>';
+                const piperIdx = getPiperIndex(), seerIdx = findRoleIndex('预言家'), guardIdx = findRoleIndex('守护者'), witchIdx = findRoleIndex('女巫');
+                const vs = nightActions.vampire;
+                let out = '';
+                // 1 吹笛人
+                if (piperIdx < 0 || isDead(piperIdx)) out += stepChip('skip', '吹笛人已出局或未分配', 'blk-piper');
+                else if (nightActions.piper.day === gameDay) out += stepChip('done', '吹笛人已施法', 'blk-piper');
+                else out += stepChip('todo', '吹笛人施法', 'blk-piper');
+                // 2 吸血鬼
+                const aliveVamps = activeVampireIndices();
+                if (aliveVamps.length === 0) out += stepChip('skip', '无吸血鬼可行动', 'blk-vamp');
+                else if (vs.day === gameDay && vs.status === 'pending') out += stepChip('todo', '吸血鬼待结算', 'blk-vamp');
+                else if (vs.day === gameDay && vs.status) out += stepChip('done', '吸血鬼已完成', 'blk-vamp');
+                else out += stepChip('todo', '吸血鬼行动', 'blk-vamp');
+                // 3 守护者
+                if (godsDisabled) out += stepChip('skip', '守护者技能已失效', 'blk-guard');
+                else if (guardIdx < 0 || isDead(guardIdx)) out += stepChip('skip', '守护者已出局或未分配', 'blk-guard');
+                else if (nightActions.guardian.night === gameDay) out += stepChip('done', '守护者已守护', 'blk-guard');
+                else out += stepChip('todo', '守护者守护', 'blk-guard');
+                // 4 预言家
+                if (godsDisabled) out += stepChip('skip', '预言家技能已失效', 'blk-seer');
+                else if (seerIdx < 0 || isDead(seerIdx)) out += stepChip('skip', '预言家已出局或未分配', 'blk-seer');
+                else if (nightActions.seer.night === gameDay && nightActions.seer.checked) out += stepChip('done', '预言家已查验', 'blk-seer');
+                else out += stepChip('todo', '预言家查验', 'blk-seer');
+                // 5 女巫
+                if (godsDisabled) out += stepChip('skip', '女巫技能已失效', 'blk-witch');
+                else if (witchIdx < 0 || isDead(witchIdx)) out += stepChip('skip', '女巫已出局或未分配', 'blk-witch');
+                else if (nightActions.witch.night === gameDay) out += stepChip('done', '女巫已行动', 'blk-witch');
+                else out += stepChip('todo', '女巫用药', 'blk-witch');
+                return '<div class="step-bar">' + out + '</div>';
+            }
+            function jumpToBlock(id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const body = el.querySelector('.block-body');
+                if (body && body.hidden) {
+                    const title = el.querySelector('.console-block-title');
+                    if (title) title.click();
+                }
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // ================= 撤销上一步 / 自动备份 =================
+            const SNAPSHOT_KEYS = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VAMP_SUICIDE_USED_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
+            const UNDO_STACK_KEY = 'village_undo_stack';
+            const UNDO_LIMIT = 12;
+            const undoBtn = document.getElementById('undoBtn');
+            const undoHint = document.getElementById('undoHint');
+            function loadUndoStack() { try { const a = JSON.parse(localStorage.getItem(UNDO_STACK_KEY)); if (Array.isArray(a)) return a; } catch (e) {} return []; }
+            function saveUndoStack(s) {
+                // 存储空间不足时逐条丢弃最老的备份，保证最近的备份一定写得进去
+                const stack = s.slice();
+                while (stack.length) {
+                    try { localStorage.setItem(UNDO_STACK_KEY, JSON.stringify(stack)); return; } catch (e) { stack.shift(); }
+                }
+                try { localStorage.removeItem(UNDO_STACK_KEY); } catch (e) {}
+            }
+            function captureHostState() { const o = {}; for (const k of SNAPSHOT_KEYS) o[k] = localStorage.getItem(k); return o; }
+            function pushUndo(label) {
+                const stack = loadUndoStack();
+                stack.push({ label: label, at: Date.now(), stamp: getGameTimeStamp(), data: captureHostState() });
+                while (stack.length > UNDO_LIMIT) stack.shift();
+                saveUndoStack(stack);
+                updateUndoHint();
+            }
+            function updateUndoHint() {
+                const stack = loadUndoStack();
+                if (undoBtn) undoBtn.disabled = stack.length === 0;
+                if (undoHint) {
+                    if (!stack.length) undoHint.textContent = '暂无可撤销的操作（关键操作会自动备份，最多保留 ' + UNDO_LIMIT + ' 步）';
+                    else { const top = stack[stack.length - 1]; undoHint.textContent = `↩️ 可撤销 ${stack.length} 步 · 最近备份：${top.label}（${top.stamp}）`; }
+                }
+            }
+            function reloadAllState() {
+                loadDeadState();
+                const c = loadCouple(); coupleA = c.a; coupleB = c.b; coupleLocked = !!c.locked;
+                loadElderState();
+                const bw = loadBewitched(); bewitchedSet.clear(); bw.forEach(function(i) { bewitchedSet.add(i); });
+                nightActions = loadNightActions();
+                piperPending = [];
+                vampParticipants = new Set();
+                vampPendingTarget = -1;
+                hunterPending = false; hunterBlockedReason = '';
+                sheriffTransferPending = false; pendingSheriffTransferFrom = -1;
+                sheriffTransfers = loadSheriffTransfers();
+                vampireSuicideUsed = loadVampireSuicideUsed();
+                loadGameTime();
+                const v = loadVotes();
+                voteVotes = v.votes || defaultVotes();
+                voteSheriff = (typeof v.sheriff === 'number') ? v.sheriff : -1;
+                voteRunoffMode = !!v.runoffMode;
+                voteRunoffTargets = Array.isArray(v.runoffTargets) ? v.runoffTargets : [];
+                const saved = loadSavedAssignment();
+                if (saved) { currentRoles = [...saved.roles]; playerNamesInput.value = (saved.names || []).join(' '); setLocked(true); }
+                renderVillageLogs();
+                refreshGameViews();
+            }
+            function undoLast() {
+                const stack = loadUndoStack();
+                if (!stack.length) { showToast('没有可撤销的操作'); return; }
+                const snap = stack.pop();
+                for (const k of SNAPSHOT_KEYS) {
+                    const val = snap.data ? snap.data[k] : null;
+                    if (val === null || val === undefined) localStorage.removeItem(k);
+                    else localStorage.setItem(k, val);
+                }
+                saveUndoStack(stack);
+                reloadAllState();
+                appendAutoLog(`↩️ 撤销上一步：${snap.label}（已回到 ${snap.stamp} 的状态）`);
+                updateUndoHint();
+                showToast(`已撤销：${snap.label}`);
+            }
+            if (undoBtn) undoBtn.addEventListener('click', function() {
+                askConfirm('↩️ 确定撤销上一步吗？<br>将回滚<b>主持人板块</b>的状态（身份、死亡、夜晚行动、投票、日志、游戏时间）；玩家板块的录入不受影响。', undoLast);
+            });
+
+            // ================= 通用确认框 =================
+            const actionConfirmModal = document.getElementById('actionConfirmModal');
+            const actionConfirmText = document.getElementById('actionConfirmText');
+            const actionConfirmYes = document.getElementById('actionConfirmYes');
+            const actionConfirmNo = document.getElementById('actionConfirmNo');
+            let pendingConfirmAction = null;
+            function askConfirm(html, onYes) {
+                pendingConfirmAction = onYes;
+                actionConfirmText.innerHTML = html;
+                actionConfirmModal.classList.remove('hidden');
+            }
+            actionConfirmYes.addEventListener('click', function() {
+                actionConfirmModal.classList.add('hidden');
+                const fn = pendingConfirmAction; pendingConfirmAction = null;
+                if (typeof fn === 'function') fn();
+            });
+            actionConfirmNo.addEventListener('click', function() { actionConfirmModal.classList.add('hidden'); pendingConfirmAction = null; });
+            actionConfirmModal.addEventListener('click', function(e) { if (e.target === actionConfirmModal) { actionConfirmModal.classList.add('hidden'); pendingConfirmAction = null; } });
+
+            // ================= 骰子历史 =================
+            const DICE_HISTORY_LIMIT = 12;
+            let diceHistory = [];
+            function renderDiceHistory() {
+                const box = document.getElementById('diceHistory');
+                if (!box) return;
+                if (!diceHistory.length) { box.innerHTML = ''; return; }
+                box.innerHTML = diceHistory.slice().reverse().map(function(h) { return `<div>${h.t} · ${h.text}</div>`; }).join('');
+            }
+            function pushDiceHistory() {
+                const txt = (diceResultDiv.innerText || '').replace(/\s+/g, ' ').trim();
+                if (!txt || txt === '—') return;
+                diceHistory.push({ t: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }), text: txt });
+                if (diceHistory.length > DICE_HISTORY_LIMIT) diceHistory.shift();
+                renderDiceHistory();
+            }
+
+            // ================= 一键重置本夜 / 目标搜索 / 快捷键 =================
+            function resetNightActions() {
+                askConfirm('🌙 确定重置本夜的全部行动吗？<br>（吸血鬼击杀与自杀、守护、预言家查验、女巫用药、待施法的吹笛名单都会被清空；<b>已生效的吹笛人施法名单保留</b>，可用「↩️ 撤销上一步」回滚）', function() {
+                    pushUndo('重置本夜全部操作');
+                    piperPending = [];
+                    resetVampire(); resetGuardian(); resetSeer(); resetWitch();
+                    renderConsole();
+                    showToast('已重置本夜全部行动');
+                });
+            }
+            function resolveAnyTarget(text) {
+                const s = String(text || '').trim();
+                if (!s) return -1;
+                let m = s.match(/^(\d+)\s*号?$/);
+                if (m) { const idx = parseInt(m[1], 10) - 1; if (idx >= 0 && idx < 15) return idx; }
+                m = s.match(/^(\d+)\s*号/);
+                if (m) { const idx = parseInt(m[1], 10) - 1; if (idx >= 0 && idx < 15) return idx; }
+                const names = parsePlayerNames(playerNamesInput.value);
+                for (let i = 0; i < 15; i++) if (names[i] && names[i] === s) return i;
+                for (let i = 0; i < 15; i++) if (names[i] && names[i].indexOf(s) >= 0) return i;
+                return -1;
+            }
+            consolePanel.addEventListener('input', function(e) {
+                if (!e.target.classList || !e.target.classList.contains('pick-search')) return;
+                const sel = consolePanel.querySelector(e.target.getAttribute('data-target'));
+                if (!sel || sel.disabled) return;
+                const idx = resolveAnyTarget(e.target.value);
+                if (idx < 0) return;
+                const opt = sel.querySelector('option[value="' + idx + '"]');
+                if (opt) { sel.value = String(idx); showToast('已定位：' + playerLabel(idx)); }
+                else showToast('该玩家不在当前可选范围内');
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+                const open = document.querySelector('.modal-overlay:not(.hidden)');
+                if (open) {
+                    open.classList.add('hidden');
+                    pendingConfirmAction = null;
+                    pendingElderReviveIndex = -1;
+                    pendingSuicideIndex = -1;
+                    pendingPlayerDeathIndex = -1;
+                }
+            });
+            updateUndoHint();
+
             // ================= 统一刷新 =================
-            function refreshGameViews() { renderAssignment(); renderVoteList(); renderConsole(); renderPlayerConsole(); updatePhaseButtons(); }
+            function refreshGameViews() { renderAssignment(); renderVoteList(); renderConsole(); renderPlayerConsole(); updatePhaseButtons(); syncCounterDice(); }
             playerNamesInput.addEventListener('input', refreshGameViews);
             renderConsole();
             renderPlayerConsole();
