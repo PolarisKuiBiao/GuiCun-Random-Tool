@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鬼村神秘小工具3.1</title>
+    <title>鬼村神秘小工具4.0</title>
     <style>
         * { box-sizing: border-box; }
         [hidden] { display: none !important; }
@@ -81,6 +81,45 @@
         .guess-cat, .guess-god { width: 100%; }
         @media (max-width: 640px) { .guess-list { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 420px) { .guess-list { grid-template-columns: 1fr; } }
+        .small { font-size: 0.88em; }
+        .dice-history { margin-top: 10px; }
+        .dice-history-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 1px dotted rgba(170,170,170,0.3); }
+        .dice-history-row:last-child { border-bottom: none; }
+        .dice-history-row.is-latest { background: rgba(0,240,255,0.07); border-radius: 6px; }
+        .dice-history-time { color: #9a93b5; font-size: 0.85em; white-space: nowrap; }
+        .dice-history-text { flex: 1; word-break: break-word; }
+        .dice-history-del { font-size: 0.8rem; padding: 2px 8px; margin: 0; background: rgba(255,60,80,0.15); border-color: rgba(255,90,110,0.5); }
+        .dice-history-del:hover { border-color: #ff5b6e; box-shadow: 0 0 10px rgba(255,90,110,0.4); }
+        .dice-history-undo { margin: 0; }
+        .dice-history-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+        .settle-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
+        .backup-file-label { font-size: 0.95rem; color: #d7fbff; padding: 8px 0; }
+        #backupFile { font-size: 0.9rem; max-width: 100%; }
+        .modal { max-height: 88vh; overflow-y: auto; }
+        .modal-actions button:focus-visible, .board-head button:focus-visible, .dice-history-del:focus-visible, .dice-history-undo:focus-visible { outline: 2px solid #00f0ff; outline-offset: 2px; }
+        @media (max-width: 640px) {
+            .site-title { font-size: 2rem; }
+            .board-head { gap: 8px; }
+            .board-head button { flex: 1 1 auto; margin: 0; }
+            .board-title { flex: 1 1 100%; order: -1; font-size: 1.25rem; padding: 10px 12px; }
+            .sticky-head { position: sticky; top: 0; z-index: 3; background: rgba(20,16,42,0.92); backdrop-filter: blur(6px); padding: 10px 0; margin: -4px 0 14px; }
+            .section { padding: 14px 12px; }
+            .content-wrap { padding: 14px 10px 50px; }
+            .menu-btn { font-size: 1.15rem; padding: 20px 16px; }
+            .console-summary { gap: 4px 12px; }
+            .action-select-row { flex-wrap: wrap; }
+            .action-select-row select, .action-select-row input[type="text"] { flex: 1 1 100%; max-width: none; }
+            .vote-row { flex-wrap: wrap; }
+            .vote-voter { min-width: 96px; }
+            .log-entry { flex-wrap: wrap; }
+            .death-grid { gap: 6px; }
+        }
+        .compact-bar { display: none; }
+        @media (max-width: 640px) {
+            .compact-bar { display: flex; flex-wrap: wrap; gap: 6px; position: sticky; bottom: 8px; z-index: 4; padding: 8px; border-radius: 12px; background: rgba(20,16,42,0.94); border: 1px solid rgba(0,240,255,0.3); box-shadow: 0 6px 24px rgba(0,0,0,0.5); margin-top: 12px; }
+            .compact-bar button { flex: 1 1 40%; margin: 0; font-size: 0.9rem; padding: 8px 6px; }
+        }
         .vote-note { font-size: 0.9rem; color: #9a93b5; margin: 0 0 10px; }
         .vote-list { margin-top: 10px; }
         .vote-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-bottom: 1px dotted rgba(170,170,170,0.3); }
@@ -184,13 +223,28 @@
             #consolePanel .console-block:nth-child(2) { grid-column: 1 / -1; }
         }
         footer { margin-top: 30px; text-align: center; color: #8a8a9a; font-size: 0.9em; }
-    </style>
+    
+        .trend-box { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(160,120,255,0.25); }
+        .trend-title { color: #f3efff; font-weight: bold; margin-bottom: 8px; font-size: 0.95rem; }
+        .trend-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: #9a93b5; font-size: 0.82rem; margin-bottom: 6px; }
+        .trend-legend .lg { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 2px; }
+        .trend-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+        .trend-label { min-width: 96px; color: #9a93b5; font-size: 0.82rem; white-space: nowrap; }
+        .trend-bar { flex: 1; display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: rgba(255,255,255,0.06); }
+        .trend-seg { display: block; height: 100%; }
+        .seg-villager { background: #7dffb0; }
+        .seg-god { background: #00f0ff; }
+        .seg-vampire { background: #ff5b6e; }
+        .seg-other { background: #ff9de2; }
+        .seg-piper { background: linear-gradient(90deg, #a06bff, #00f0ff); }
+        .trend-num { min-width: 74px; text-align: right; color: #e6dcff; font-size: 0.82rem; }
+</style>
 </head>
 <body>
     <div class="ghost-bg" aria-hidden="true"><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span><span>👻</span><span>🎃</span><span>👻</span><span>👻</span><span>🎃</span></div>
     <div class="content-wrap">
         <div id="menuView" class="view">
-            <h1 class="site-title">👻 鬼村神秘小工具 3.1</h1>
+            <h1 class="site-title">👻 鬼村神秘小工具 4.0</h1>
             <p class="menu-subtitle">请选择要进入的板块</p>
             <div class="menu">
                 <button class="menu-btn" data-view="funBoardView">🎮 娱乐功能</button>
@@ -209,7 +263,7 @@
         </div>
 
         <div id="hostBoardView" class="view" hidden>
-            <div class="board-head sticky-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🖥️ 主持人板块</h2><button id="undoBtn" class="undo-btn" disabled>↩️ 撤销上一步</button><button id="settleBtn" class="settle-btn">🏁 结算与导出</button><button id="resetHostBtn" class="reset-host-btn">🔄 重置所有内容</button></div>
+            <div class="board-head sticky-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">🖥️ 主持人板块</h2><button id="undoBtn" class="undo-btn" disabled>↩️ 撤销上一步</button><button id="settleBtn" class="settle-btn">🏁 结算与导出</button><button id="backupBtn" class="settle-btn">💾 备份 / 恢复</button><button id="resetHostBtn" class="reset-host-btn">🔄 重置所有内容</button></div>
             <div id="undoHint" class="undo-hint">暂无可撤销的操作</div>
             <div class="section">
                 <h3>🆔 15人身份分配</h3>
@@ -226,6 +280,7 @@
                     <button class="faction-tab" data-faction="villager">🧑‍🌾 村民</button>
                     <button class="faction-tab" data-faction="vampire">🧛 吸血鬼</button>
                     <button class="faction-tab" data-faction="god">✨ 神职</button>
+                    <button class="faction-tab" data-faction="neutral">🎶 中立</button>
                 </div>
                 <div id="assignmentResult" class="result"><div class="small" style="color: #888;">点击按钮生成分配</div></div>
             </div>
@@ -233,6 +288,12 @@
                 <h3>🖥️ 主持人控制台</h3>
                 <p class="console-note">上帝视角：死亡、情侣、夜晚行动与流程提醒。</p>
                 <div id="consolePanel" class="console-panel"></div>
+                <div class="compact-bar" aria-label="常用操作">
+                    <button type="button" data-quick="undo">↩️ 撤销</button>
+                    <button type="button" data-quick="reset-night">🌙 重置本夜</button>
+                    <button type="button" data-quick="advance">⏭️ 推进阶段</button>
+                    <button type="button" data-quick="settle">🏁 结算</button>
+                </div>
             </div>
             <div class="section">
                 <h3>🗳️ 投票</h3>
@@ -246,7 +307,7 @@
             </div>
             <div class="section">
                 <h3>📜 村中日志</h3>
-                <p class="game-time-note">日志时间戳按当前游戏时间记录；游戏时间请在「主持人控制台 · 流程提醒」中设置（上限七天）。</p>
+                <p class="game-time-note">日志时间戳按当前游戏时间记录；游戏时间请在「主持人控制台 · 流程提醒」中设置。</p>
                 <textarea id="logInput" rows="3" placeholder="例如：警长投票投给了3号"></textarea>
                 <button id="logBtn">📝 记录今天</button>
                 <div id="logHint" class="log-hint"></div>
@@ -290,7 +351,7 @@
             <div class="board-head"><button class="back-btn" data-back="menuView">🔙 返回菜单</button><h2 class="board-title">👥 玩家板块</h2></div>
             <div class="section">
                 <h3>🔮 玩家推测</h3>
-                <p class="guess-note">根据玩家姓名推测每个人的阵营；选择「神职」可指定具体身份，「中立」即吹笛人。</p>
+                <p class="guess-note">根据玩家姓名推测每个人的阵营；选择「神职」可指定具体身份，「中立」选择具体身份。</p>
                 <button id="resetGuessesBtn">🔄 重置推测</button>
                 <div id="guessList" class="guess-list"></div>
             </div>
@@ -304,40 +365,40 @@
         </div>
     </div>
 
-    <div id="confirmModal" class="modal-overlay hidden">
+    <div id="confirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="清空日志确认">
         <div class="modal"><p>⚠️ 确定要清空所有日志吗？<br>此操作无法撤销。</p><div class="modal-actions"><button id="confirmYes">🗑️ 确认清空</button><button id="confirmNo">取消</button></div></div>
     </div>
-    <div id="piperConfirmModal" class="modal-overlay hidden">
+    <div id="piperConfirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="吹笛人施法确认">
         <div class="modal"><p id="piperConfirmText">确定选择吹笛对象吗？</p><div class="modal-actions"><button id="piperConfirmYes">✅ 确认</button><button id="piperConfirmNo">取消</button></div></div>
     </div>
-    <div id="vampConfirmModal" class="modal-overlay hidden">
+    <div id="vampConfirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="吸血鬼击杀确认">
         <div class="modal"><p id="vampConfirmText">确认击杀吗？</p><div class="modal-actions"><button id="vampConfirmYes">🩸 确认击杀</button><button id="vampConfirmNo">取消</button></div></div>
     </div>
-    <div id="suicideConfirmModal" class="modal-overlay hidden">
+    <div id="suicideConfirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="吸血鬼自杀确认">
         <div class="modal"><p id="suicideConfirmText">确认自杀吗？</p><div class="modal-actions"><button id="suicideConfirmYes">🗡️ 确认自杀</button><button id="suicideConfirmNo">取消</button></div></div>
     </div>
-    <div id="hunterModal" class="modal-overlay hidden">
+    <div id="hunterModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="猎人开枪">
         <div class="modal"><p id="hunterText">🔫 猎人已死亡，请选择开枪击杀对象</p><select id="hunterTargetSelect"></select><div class="modal-actions"><button id="hunterConfirm">🔫 确认开枪</button><button id="hunterCancel">取消</button></div></div>
     </div>
-    <div id="sheriffTransferModal" class="modal-overlay hidden">
+    <div id="sheriffTransferModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="警长移交">
         <div class="modal"><p id="sheriffTransferText">👑 警长已死亡，请选择移交对象</p><select id="sheriffTargetSelect"></select><div class="modal-actions"><button id="sheriffTransferConfirm">👑 确认移交</button><button id="sheriffTransferCancel">取消</button></div></div>
     </div>
-    <div id="advanceNightModal" class="modal-overlay hidden">
+    <div id="advanceNightModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="进入下一阶段">
         <div class="modal"><p id="advanceNightText">是否进入下一阶段？</p><div class="modal-actions"><button id="advanceNightYes">🌅 确认</button><button id="advanceNightNo">取消</button></div></div>
     </div>
-    <div id="advanceDayModal" class="modal-overlay hidden">
+    <div id="advanceDayModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="进入黑夜">
         <div class="modal"><p id="advanceDayText">是否进入下一阶段？</p><div class="modal-actions"><button id="advanceDayYes">🌙 确认</button><button id="advanceDayNo">取消</button></div></div>
     </div>
-    <div id="playerDeathModal" class="modal-overlay hidden">
+    <div id="playerDeathModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="选择死亡原因">
         <div class="modal"><p>选择死亡原因</p><select id="playerDeathReason"><option>投票处决</option><option>吸血鬼击杀</option><option>女巫毒杀</option><option>猎人开枪击杀</option><option>情侣殉情</option><option>吸血鬼自杀</option></select><div class="modal-actions"><button id="playerDeathConfirm">💀 确认死亡</button><button id="playerDeathCancel">取消</button></div></div>
     </div>
-    <div id="resetDeathModal" class="modal-overlay hidden">
+    <div id="resetDeathModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="重置死亡状态">
         <div class="modal"><p>🔄 确定要重置所有玩家的死亡状态吗？<br>（将复活所有玩家，并恢复长老生命与神职技能）</p><div class="modal-actions"><button id="resetDeathYes">🔄 确认重置</button><button id="resetDeathNo">取消</button></div></div>
     </div>
-    <div id="actionConfirmModal" class="modal-overlay hidden">
+    <div id="actionConfirmModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="操作确认">
         <div class="modal"><p id="actionConfirmText">确定执行此操作吗？</p><div class="modal-actions"><button id="actionConfirmYes">✅ 确认执行</button><button id="actionConfirmNo">取消</button></div></div>
     </div>
-    <div id="settleModal" class="modal-overlay hidden">
+    <div id="settleModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="结算摘要">
         <div class="modal settle-modal">
             <p class="settle-title">🏁 结算摘要</p>
             <div id="settleSummary" class="settle-summary"></div>
@@ -349,14 +410,41 @@
             </div>
         </div>
     </div>
-    <div id="elderReviveModal" class="modal-overlay hidden">
+    <div id="backupModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="备份与恢复">
+        <div class="modal settle-modal">
+            <p class="settle-title">💾 备份与恢复</p>
+            <p class="settle-note">导出的是本局全部状态（身份、死亡、夜晚行动、投票、日志、游戏时间等）。换设备或清缓存前请先导出；在新设备上导入同一份 JSON 即可继续。</p>
+            <textarea id="backupExport" rows="10" readonly spellcheck="false"></textarea>
+            <div class="modal-actions">
+                <button id="backupDownload">📥 导出备份（JSON）</button>
+                <button id="backupCopy">📋 复制备份</button>
+                <label class="backup-file-label" for="backupFile">📤 导入备份：</label>
+                <input type="file" id="backupFile" accept=".json,application/json">
+                <button id="backupClose">关闭</button>
+            </div>
+            <div id="backupHint" class="log-hint"></div>
+        </div>
+    </div>
+    <div id="pendingActionModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="待处理提醒">
+        <div class="modal">
+            <p class="settle-title">⏰ 有待处理事项</p>
+            <div id="pendingActionText" class="settle-summary"></div>
+            <div class="modal-actions">
+                <button id="pendingNow">⚡ 立刻处理</button>
+                <button id="pendingLater">🕒 稍后处理</button>
+            </div>
+            <div class="ref-tip">稍后处理也不会丢失：主持人控制台「💀 死亡标记」区会保留待办按钮，随时可以补做。</div>
+        </div>
+    </div>
+    <div id="elderReviveModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="长老生命值提示">
         <div class="modal"><p id="elderReviveText">长老生命值提示</p><div class="modal-actions"><button id="elderReviveYes">✅ 按规则复原并撤销死亡</button><button id="elderReviveNo">取消</button></div></div>
     </div>
-    <div id="resetHostModal" class="modal-overlay hidden">
+    <div id="resetHostModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="重置主持人板块">
         <div class="modal"><p>🔄 确定要重置主持人板块的所有内容吗？<br>（将清空身份分配、死亡、情侣、夜晚行动、投票、日志与游戏时间）</p><div class="modal-actions"><button id="resetHostYes">🔄 确认重置</button><button id="resetHostNo">取消</button></div></div>
     </div>
 
     <script>
+
         (function() {
             function showView(viewId) {
                 document.querySelectorAll('.view').forEach(function(v) { v.hidden = true; });
@@ -376,6 +464,8 @@
             let elderLives = 2;
             let godsDisabled = false;
 
+            // 标记：处于"从存储重建界面"的过程中，任何写操作都不应再把状态写回去
+            let stateQuiet = false;
             const DEAD_KEY = 'village_dead';
             const DEATH_REASONS_KEY = 'village_death_reasons';
             const DEATH_TIMES_KEY = 'village_death_times';
@@ -397,6 +487,7 @@
             function isDead(i) { return deadSet.has(i); }
             function deathReason(i) { return deathReasons[i] || ''; }
             function saveDeadState() {
+                if (stateQuiet) return;
                 localStorage.setItem(DEAD_KEY, JSON.stringify(Array.from(deadSet)));
                 localStorage.setItem(DEATH_REASONS_KEY, JSON.stringify(deathReasons));
                 localStorage.setItem(DEATH_TIMES_KEY, JSON.stringify(deathTimes));
@@ -413,8 +504,8 @@
                 try { const c = JSON.parse(localStorage.getItem(COUPLE_KEY)); if (c && typeof c.a === 'number' && typeof c.b === 'number') { if (c.a >= 0 && c.a === c.b) c.b = -1; return c; } } catch (e) {}
                 return { a: -1, b: -1, locked: false };
             }
-            function saveCouple() { localStorage.setItem(COUPLE_KEY, JSON.stringify({ a: coupleA, b: coupleB, locked: coupleLocked })); }
-            function saveElderState() { localStorage.setItem(ELDER_KEY, JSON.stringify({ lives: elderLives, godsDisabled: godsDisabled })); }
+            function saveCouple() { if (stateQuiet) return; localStorage.setItem(COUPLE_KEY, JSON.stringify({ a: coupleA, b: coupleB, locked: coupleLocked })); }
+            function saveElderState() { if (stateQuiet) return; localStorage.setItem(ELDER_KEY, JSON.stringify({ lives: elderLives, godsDisabled: godsDisabled })); }
             function loadElderState() {
                 try { const e = JSON.parse(localStorage.getItem(ELDER_KEY)); if (e && typeof e === 'object') { elderLives = (typeof e.lives === 'number') ? e.lives : 2; godsDisabled = !!e.godsDisabled; } } catch (e) {}
             }
@@ -447,13 +538,13 @@
             let currentFaction = 'all';
             let isLocked = false;
             function parsePlayerNames(raw) { if (!raw || !raw.trim()) return []; return raw.trim().split(/[\s,，、;；]+/).filter(Boolean).slice(0, 15); }
-            function roleFaction(role) { if (role === '普通村民') return 'villager'; if (role === '吸血鬼') return 'vampire'; return 'god'; }
+            function roleFaction(role) { if (role === '普通村民') return 'villager'; if (role === '吸血鬼') return 'vampire'; if (role === '吹笛人') return 'neutral'; return 'god'; }
             function factionMatches(role, faction) { if (faction === 'all') return true; return roleFaction(role) === faction; }
             function generateAssignment() { currentRoles = shuffleArray(ROLE_POOL); }
             function renderAssignment() {
                 playerNamesArr = parsePlayerNames(playerNamesInput.value);
                 let html = '<div class="assignment-grid">';
-                if (currentRoles) { for (let i = 0; i < 15; i++) { const role = currentRoles[i]; if (!factionMatches(role, currentFaction)) continue; const namePart = playerNamesArr[i] ? `（${playerNamesArr[i]}）` : ''; html += `<div class="assignment-item"><strong>${i+1}号</strong>${namePart}：${role}</div>`; } }
+                if (currentRoles) { for (let i = 0; i < 15; i++) { const role = currentRoles[i]; if (!factionMatches(role, currentFaction)) continue; const namePart = playerNamesArr[i] ? `（${playerNamesArr[i]}）` : ''; html += `<div class="assignment-item"><strong>${i+1}号</strong>${escapeLogHtml(namePart)}：${role}</div>`; } }
                 html += '</div>';
                 html += `<div class="assignment-tip">${isLocked ? '🔒 分配已保存并锁定' : '💡 点击「保存分配」可锁定当前角色，防止刷新后重新分配'}</div>`;
                 assignmentDiv.innerHTML = html;
@@ -465,9 +556,9 @@
                 }
             }
             function renderStatsHtml() {
-                let v = 0, va = 0, mp = 0, mpa = 0, g = 0, ga = 0;
-                if (currentRoles) { for (let i = 0; i < currentRoles.length; i++) { const f = roleFaction(currentRoles[i]); const alive = !isDead(i); if (f === 'villager') { v++; if (alive) va++; } else if (f === 'vampire') { mp++; if (alive) mpa++; } else { g++; if (alive) ga++; } } }
-                return `<div class="assignment-stats" title="存活人数 / 总人数">👥 统计：普通村民 <b>${va}</b><span class="stat-total">/${v}</span>人 · 吸血鬼 <b>${mpa}</b><span class="stat-total">/${mp}</span>人 · 神职 <b>${ga}</b><span class="stat-total">/${g}</span>人</div>`;
+                let v = 0, va = 0, mp = 0, mpa = 0, g = 0, ga = 0, n = 0, na = 0;
+                if (currentRoles) { for (let i = 0; i < currentRoles.length; i++) { const f = roleFaction(currentRoles[i]); const alive = !isDead(i); if (f === 'villager') { v++; if (alive) va++; } else if (f === 'vampire') { mp++; if (alive) mpa++; } else if (f === 'neutral') { n++; if (alive) na++; } else { g++; if (alive) ga++; } } }
+                return `<div class="assignment-stats" title="存活人数 / 总人数">👥 统计：普通村民 <b>${va}</b><span class="stat-total">/${v}</span>人 · 吸血鬼 <b>${mpa}</b><span class="stat-total">/${mp}</span>人 · 神职 <b>${ga}</b><span class="stat-total">/${g}</span>人 · 中立 <b>${na}</b><span class="stat-total">/${n}</span>人</div>`;
             }
             function setLocked(locked) { isLocked = locked; assignBtn.disabled = locked; playerNamesInput.disabled = locked; saveAssignBtn.disabled = locked; saveAssignBtn.textContent = locked ? '🔒 已保存' : '💾 保存分配'; }
             function loadSavedAssignment() { try { const data = JSON.parse(localStorage.getItem(ASSIGN_SAVE_KEY)); if (data && Array.isArray(data.roles) && data.roles.length === 15) return data; } catch (e) {} return null; }
@@ -523,12 +614,12 @@
             let gamePhase = '白天';
             function chineseDay(n) { return DAY_NAMES[n - 1] || String(n); }
             function loadGameTime() { try { const data = JSON.parse(localStorage.getItem(GAME_TIME_KEY)); if (data && typeof data.day === 'number' && (data.phase === '白天' || data.phase === '夜晚')) { gameDay = Math.min(MAX_DAY, Math.max(1, data.day)); gamePhase = data.phase; } } catch (e) {} }
-            function saveGameTime() { localStorage.setItem(GAME_TIME_KEY, JSON.stringify({ day: gameDay, phase: gamePhase })); }
+            function saveGameTime() { if (stateQuiet) return; localStorage.setItem(GAME_TIME_KEY, JSON.stringify({ day: gameDay, phase: gamePhase })); }
             function getGameTimeStamp() { return `第${chineseDay(gameDay)}天${gamePhase}`; }
             function makeLogId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
             function escapeLogHtml(str) { return String(str).replace(/[&<>"']/g, function(ch) { return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[ch]; }); }
             function loadVillageLogs() { try { const parsed = JSON.parse(localStorage.getItem(VILLAGE_LOG_KEY)); if (Array.isArray(parsed)) return parsed; } catch (e) {} return []; }
-            function saveVillageLogs(logs) { localStorage.setItem(VILLAGE_LOG_KEY, JSON.stringify(logs)); }
+            function saveVillageLogs(logs) { if (stateQuiet) return; localStorage.setItem(VILLAGE_LOG_KEY, JSON.stringify(logs)); }
             function renderVillageLogs() {
                 const logs = loadVillageLogs();
                 if (!logs.length) { logList.innerHTML = '<div class="log-empty">🌙 夜深了，还没有任何记录...</div>'; clearLogBtn.style.display = 'none'; return; }
@@ -625,12 +716,12 @@
             let voteRunoffTargets = [];       // 第二轮候选（平票者）
             function defaultVotes() { return new Array(15).fill(-1); }
             function loadVotes() { try { const data = JSON.parse(localStorage.getItem(VOTE_KEY)); if (data && Array.isArray(data.votes) && data.votes.length === 15) return data; } catch (e) {} return { votes: defaultVotes(), sheriff: -1, runoffMode: false, runoffTargets: [] }; }
-            function saveVotes() { localStorage.setItem(VOTE_KEY, JSON.stringify({ votes: voteVotes, sheriff: voteSheriff, runoffMode: voteRunoffMode, runoffTargets: voteRunoffTargets })); }
-            function refreshSheriffSelect() { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 无警长 —</option>'; for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${voteSheriff === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } sheriffSelect.innerHTML = opts; }
+            function saveVotes() { if (stateQuiet) return; localStorage.setItem(VOTE_KEY, JSON.stringify({ votes: voteVotes, sheriff: voteSheriff, runoffMode: voteRunoffMode, runoffTargets: voteRunoffTargets })); }
+            function refreshSheriffSelect() { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 无警长 —</option>'; for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${escapeLogHtml(names[i])}）` : ''; opts += `<option value="${i}"${voteSheriff === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } sheriffSelect.innerHTML = opts; }
             function renderVoteList() {
                 refreshSheriffSelect(); const names = parsePlayerNames(playerNamesInput.value); let html = '';
                 if (voteRunoffMode) html += `<div class="vote-note">⚖️ 第 2 轮投票进行中：本轮只能投给平票者 ${voteRunoffTargets.map(function(t) { return playerLabel(t); }).join('、')}；若再次平票则无人出局，直接进入当天的黑夜。</div>`;
-                for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${names[i]}）` : ''; const dead = isDead(i); const isSheriff = (voteSheriff === i); let opts = '<option value="-1">弃票</option>'; for (let t = 0; t < 15; t++) { if (isDead(t)) continue; if (voteRunoffMode && voteRunoffTargets.indexOf(t) < 0) continue; const tnm = names[t] ? `（${names[t]}）` : ''; opts += `<option value="${t}"${voteVotes[i] === t ? ' selected' : ''}>${t + 1}号${tnm}</option>`; } html += `<div class="vote-row${dead ? ' dead' : ''}"><span class="vote-voter">${i + 1}号${nm}${isSheriff ? ' 👑' : ''}${dead ? ' 💀' : ''}</span><span class="vote-arrow">→</span><select class="vote-target" data-index="${i}"${dead ? ' disabled' : ''}>${opts}</select></div>`; }
+                for (let i = 0; i < 15; i++) { const nm = names[i] ? `（${escapeLogHtml(names[i])}）` : ''; const dead = isDead(i); const isSheriff = (voteSheriff === i); let opts = '<option value="-1">弃票</option>'; for (let t = 0; t < 15; t++) { if (isDead(t)) continue; if (voteRunoffMode && voteRunoffTargets.indexOf(t) < 0) continue; const tnm = names[t] ? `（${names[t]}）` : ''; opts += `<option value="${t}"${voteVotes[i] === t ? ' selected' : ''}>${t + 1}号${tnm}</option>`; } html += `<div class="vote-row${dead ? ' dead' : ''}"><span class="vote-voter">${i + 1}号${nm}${isSheriff ? ' 👑' : ''}${dead ? ' 💀' : ''}</span><span class="vote-arrow">→</span><select class="vote-target" data-index="${i}"${dead ? ' disabled' : ''}>${opts}</select></div>`; }
                 voteList.innerHTML = html; renderVoteResult();
             }
             function computeVoteRanking() { const counts = new Array(15).fill(0); let abstain = 0; let aliveVoters = 0; for (let v = 0; v < 15; v++) { if (isDead(v)) continue; aliveVoters++; const t = voteVotes[v]; if (t < 0 || t >= 15 || isDead(t)) { abstain++; continue; } const weight = (!sheriffElectionMode && v === voteSheriff) ? 2 : 1; counts[t] += weight; } const ranked = []; for (let t = 0; t < 15; t++) if (counts[t] > 0) ranked.push({ target: t, votes: counts[t] }); ranked.sort(function(a, b) { return b.votes - a.votes; }); return { ranked: ranked, abstain: abstain, aliveVoters: aliveVoters }; }
@@ -813,7 +904,25 @@
             let piperPending = [];
             let vampParticipants = new Set();
             let hunterPending = false;
-            let hunterBlockedReason = '';
+            let hunterShotTaken = false;
+            // 猎人能否开枪：猎人已死亡 + 尚未开过枪 + 神职能力未失效 + 未满足任一阵营胜利条件。
+            // 每次渲染时实时计算，避免“死亡瞬间记下的状态”过期导致误提示。
+            function hunterCanShoot() {
+                const hi = findRoleIndex('猎人');
+                if (hi < 0 || !isDead(hi)) return false;
+                if (hunterShotTaken) return false;
+                if (godsDisabled) return false;
+                if (anyVictoryReached()) return false;
+                return true;
+            }
+            function hunterBlockedReasonNow() {
+                const hi = findRoleIndex('猎人');
+                if (hi < 0 || !isDead(hi)) return '';
+                if (hunterShotTaken) return '本局猎人已经开过枪';
+                if (godsDisabled) return '神职能力已因长老特殊死亡而失效';
+                if (anyVictoryReached()) return '游戏已满足任一阵营的胜利条件，猎人不能开枪';
+                return '';
+            }
             let sheriffTransferPending = false;
             let pendingSheriffTransferFrom = -1;
             let sheriffTransfers = [];
@@ -822,23 +931,25 @@
             const VAMP_SUICIDE_USED_KEY = 'village_vamp_suicide_used';
             let vampireSuicideUsed = false;
             function loadVampireSuicideUsed() { try { return localStorage.getItem(VAMP_SUICIDE_USED_KEY) === '1'; } catch (e) { return false; } }
-            function saveVampireSuicideUsed() { localStorage.setItem(VAMP_SUICIDE_USED_KEY, vampireSuicideUsed ? '1' : '0'); }
+            function saveVampireSuicideUsed() { if (stateQuiet) return; localStorage.setItem(VAMP_SUICIDE_USED_KEY, vampireSuicideUsed ? '1' : '0'); }
             function loadSheriffTransfers() { try { const arr = JSON.parse(localStorage.getItem(SHERIFF_TRANSFERS_KEY)); if (Array.isArray(arr)) return arr; } catch (e) {} return []; }
-            function saveSheriffTransfers() { localStorage.setItem(SHERIFF_TRANSFERS_KEY, JSON.stringify(sheriffTransfers)); }
+            function saveSheriffTransfers() { if (stateQuiet) return; localStorage.setItem(SHERIFF_TRANSFERS_KEY, JSON.stringify(sheriffTransfers)); }
 
             function defaultNightActions() { return { piper: { day: 0, count: 0, targets: [] }, vampire: { day: 0, target: -1, participants: [], status: '', suicide: { day: 0, target: -1, status: '' } }, guardian: { night: 0, target: -1 }, witch: { poisonUsed: false, antidoteUsed: false, night: 0, lastAction: '' }, seer: { night: 0, checked: false, target: -1, faction: '' } }; }
             function loadNightActions() { try { const d = JSON.parse(localStorage.getItem(NIGHT_ACTIONS_KEY)); if (d && typeof d === 'object') { const def = defaultNightActions(); const vamp = Object.assign({}, def.vampire, d.vampire); vamp.suicide = Object.assign({}, def.vampire.suicide, (d.vampire && d.vampire.suicide) || {}); return { piper: Object.assign({}, def.piper, d.piper), vampire: vamp, guardian: Object.assign({}, def.guardian, d.guardian), witch: Object.assign({}, def.witch, d.witch), seer: Object.assign({}, def.seer, d.seer) }; } } catch (e) {} return defaultNightActions(); }
-            function saveNightActions() { localStorage.setItem(NIGHT_ACTIONS_KEY, JSON.stringify(nightActions)); }
+            function saveNightActions() { if (stateQuiet) return; localStorage.setItem(NIGHT_ACTIONS_KEY, JSON.stringify(nightActions)); }
             function loadBewitched() { try { const parsed = JSON.parse(localStorage.getItem(SPELL_KEY)); if (Array.isArray(parsed)) return new Set(parsed); } catch (e) {} return new Set(); }
-            function saveBewitched() { localStorage.setItem(SPELL_KEY, JSON.stringify(Array.from(bewitchedSet))); }
+            function saveBewitched() { if (stateQuiet) return; localStorage.setItem(SPELL_KEY, JSON.stringify(Array.from(bewitchedSet))); }
             function getPiperIndex() { if (!currentRoles) return -1; for (let i = 0; i < currentRoles.length; i++) if (currentRoles[i] === '吹笛人') return i; return -1; }
             function findRoleIndex(role) { if (!currentRoles) return -1; for (let i = 0; i < currentRoles.length; i++) if (currentRoles[i] === role) return i; return -1; }
             function playerLabel(i) { const names = parsePlayerNames(playerNamesInput.value); return `${i + 1}号${names[i] ? `（${names[i]}）` : ''}`; }
+            // 需要拼进 innerHTML 的场合请用这个（姓名来自玩家输入，必须转义）
+            function playerLabelHtml(i) { return escapeLogHtml(playerLabel(i)); }
             function piperNightInfo() { const max = (gameDay % 2 === 1) ? 1 : 2; const used = (nightActions.piper.day === gameDay) ? nightActions.piper.count : 0; return { max: max, used: used, remaining: max - used }; }
             function vampireIndices() { const r = []; if (currentRoles) for (let i = 0; i < 15; i++) if (currentRoles[i] === '吸血鬼') r.push(i); return r; }
             function aliveTargetOptions(selected) { let opts = '<option value="">— 选择 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i)) continue; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${playerLabel(i)}</option>`; } return opts; }
             function guardTargetOptions(prevTarget) { let opts = '<option value="">— 选择守护对象 —</option>'; for (let i = 0; i < 15; i++) { if (isDead(i) || i === prevTarget) continue; opts += `<option value="${i}">${playerLabel(i)}</option>`; } return opts; }
-            function piperTargetOptions() { const names = parsePlayerNames(playerNamesInput.value); const piper = getPiperIndex(); let opts = '<option value="">— 选择玩家 —</option>'; for (let i = 0; i < 15; i++) { if (i === piper || isDead(i) || bewitchedSet.has(i) || piperPending.indexOf(i) >= 0) continue; opts += `<option value="${i}">${i + 1}号${names[i] ? `（${names[i]}）` : ''}</option>`; } return opts; }
+            function piperTargetOptions() { const names = parsePlayerNames(playerNamesInput.value); const piper = getPiperIndex(); let opts = '<option value="">— 选择玩家 —</option>'; for (let i = 0; i < 15; i++) { if (i === piper || isDead(i) || bewitchedSet.has(i) || piperPending.indexOf(i) >= 0) continue; opts += `<option value="${i}">${i + 1}号${names[i] ? `（${escapeLogHtml(names[i])}）` : ''}</option>`; } return opts; }
             // 规则书：查验结果只有两种口径——「好人」或「中立或以下」；括号内标注真实身份，仅供主持人参考
             function seerAnswerOf(role) { return (role === '吸血鬼' || role === '吹笛人') ? '中立或以下阵营' : '好人阵营'; }
             function seerFactionOf(role) { return `${seerAnswerOf(role)}（真实身份：${role || '未知'}）`; }
@@ -852,6 +963,8 @@
                 if (role === '丘比特') return 'cupid';
                 return 'god'; // 长老 / 预言家 / 女巫 / 猎人 / 守护者
             }
+            // 规则书：吸血鬼的胜利条件为杀死所有村民或杀死所有神职（不包括丘比特）。
+            // 因此神职计数 counts.god 只统计 长老/预言家/女巫/守护者/猎人；丘比特与吹笛人都不计入。
             function aliveIndices() { const r = []; for (let i = 0; i < 15; i++) if (!isDead(i)) r.push(i); return r; }
             function victoryStatus() {
                 const alive = aliveIndices();
@@ -903,7 +1016,7 @@
                 if (v.any) html += '<div class="notice-banner">🏁 已有阵营满足胜利条件 —— 可与全场确认后点击顶部「🏁 结算与导出」。</div>';
                 html += '<div class="flow-list">';
                 html += `<div>${mark(v.goodWin)} · <b>好人阵营</b>：杀死所有吸血鬼（存活吸血鬼 <b>${v.counts.vampire}</b> 人）</div>`;
-                html += `<div>${mark(v.vampireWin)} · <b>吸血鬼阵营</b>：杀死所有普通村民（存活 <b>${v.counts.villager}</b> 人）或杀死所有神职（不含丘比特，存活 <b>${v.counts.god}</b> 人）</div>`;
+                html += `<div>${mark(v.vampireWin)} · <b>吸血鬼阵营</b>：杀死所有普通村民（存活 <b>${v.counts.villager}</b> 人）或杀死所有神职（不含丘比特、吹笛人，存活 <b>${v.counts.god}</b> 人）</div>`;
                 html += `<div>${mark(v.piperWin)} · <b>吹笛者</b>：场上所有存活玩家均被施法（<b>${v.piperDone}</b> / ${v.piperTotal}）</div>`;
                 html += `<div>${mark(v.coupleReached)} · <b>情侣方</b>：${v.coupleText}（丘比特与情侣方共享胜利条件）</div>`;
                 html += '</div>';
@@ -925,10 +1038,9 @@
                 deathTimes[index] = getGameTimeStamp();
                 saveDeadState();
                 if (currentRoles && currentRoles[index] === '猎人') {
-                    // 规则书：猎人死亡后若整场游戏继续（未满足任一阵营胜利条件）才能开枪
-                    if (godsDisabled) hunterBlockedReason = '神职能力已因长老特殊死亡而失效';
-                    else if (anyVictoryReached()) hunterBlockedReason = '游戏已满足任一阵营的胜利条件，猎人不能开枪';
-                    else hunterPending = true;
+                    // 规则书：猎人死亡后若整场游戏继续（未满足任一阵营胜利条件）才能开枪。
+                    // 能否开枪在渲染时按当前局势实时判定，避免“死后局势已结束却仍提示未开枪”。
+                    hunterPending = !hunterShotTaken;
                 }
                 if (voteSheriff === index) { sheriffTransferPending = true; pendingSheriffTransferFrom = index; }
                 if (index === coupleA && coupleB >= 0 && !isDead(coupleB)) markDead(coupleB, REASON_COUPLE);
@@ -936,8 +1048,73 @@
                 return true;
             }
 
+            // ---------- 待处理提醒：猎人需开枪 / 警长需移交 ----------
+            // 每次死亡结算后检查一次；主持人可「立刻处理」或「稍后处理」。
+            // 稍后处理只是关掉弹窗，控制台「死亡标记」区的待办按钮仍然保留。
+            let pendingActionModalSuppressed = '';
+            // 从提醒弹窗进入子流程时置位，避免第一个弹窗一关就立刻再弹提醒
+            let pendingFlowActive = null;
+            function pendingReminders() {
+                const out = [];
+                if (hunterCanShoot()) out.push({ kind: 'hunter', text: '🔫 猎人（' + playerLabel(findRoleIndex('猎人')) + '）已死亡，需要选择开枪对象' });
+                if (sheriffTransferPending) out.push({ kind: 'sheriff', text: '👑 警长（' + playerLabel(pendingSheriffTransferFrom) + '）已死亡，需要指定新的警长' });
+                return out;
+            }
+            function pendingReminderSignature(list) { return list.map(function(p) { return p.kind; }).join('+'); }
+            function pendingModalCard() { return document.getElementById('pendingActionModal'); }
+            function checkPendingActionModal() {
+                const list = pendingReminders();
+                const modal = pendingModalCard();
+                if (!modal) return;
+                if (!list.length) { pendingActionModalSuppressed = ''; return; }
+                const sig = pendingReminderSignature(list);
+                if (pendingActionModalSuppressed === sig) return;
+                const textEl = document.getElementById('pendingActionText');
+                if (textEl) {
+                    const both = list.length > 1 ? '<div class="ref-tip">这两件事都需要处理：会先带你做第一件，做完后如果还有待办会再次提醒你。</div>' : '';
+                    textEl.innerHTML = list.map(function(p) { return '<div>' + p.text + '</div>'; }).join('') +
+                        both +
+                        '<div class="ref-tip">现在处理或稍后处理都可以；稍后处理不会丢，控制台「💀 死亡标记」区一直保留待办按钮。</div>';
+                }
+                modal.classList.remove('hidden');
+            }
+            function handlePendingNow() {
+                const list = pendingReminders();
+                pendingActionModalSuppressed = '';
+                const modal = pendingModalCard();
+                if (modal) modal.classList.add('hidden');
+                if (!list.length) return;
+                pendingFlowActive = list[0].kind;
+                if (list.length > 1) showToast('先处理第一件，完成后会再提醒你剩下的待办');
+                if (pendingFlowActive === 'hunter') { showHunterModal(); return; }
+                if (pendingFlowActive === 'sheriff') { showSheriffTransferModal(); }
+            }
+            function handlePendingLater() {
+                const list = pendingReminders();
+                pendingActionModalSuppressed = pendingReminderSignature(list);
+                const modal = pendingModalCard();
+                if (modal) modal.classList.add('hidden');
+                showToast('已记下待处理事项：控制台「💀 死亡标记」区可随时补做');
+            }
+            (function initPendingActionModal() {
+                const modal = pendingModalCard();
+                if (!modal) return;
+                const nowBtn = document.getElementById('pendingNow');
+                const laterBtn = document.getElementById('pendingLater');
+                if (nowBtn) nowBtn.addEventListener('click', handlePendingNow);
+                if (laterBtn) laterBtn.addEventListener('click', handlePendingLater);
+                // 点击遮罩＝稍后处理；按 Esc 关掉也视为稍后处理，避免误判为"已处理"
+                modal.addEventListener('click', function(e) { if (e.target === modal) handlePendingLater(); });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && !modal.classList.contains('hidden')) handlePendingLater();
+                });
+            })();
+            // 猎人开枪 / 警长移交的弹窗关闭后，解除"正在处理"状态，让提醒可以再次弹出
+            function endPendingFlow() { pendingFlowActive = null; }
             function finishDeathResolution() {
                 refreshGameViews();
+                if (pendingFlowActive) return;
+                checkPendingActionModal();
             }
             function revivePlayer(index) {
                 if (!isDead(index)) return false;
@@ -1131,6 +1308,7 @@
                 if (gamePhase !== '白天') return;
                 pushUndo('进入第' + chineseDay(gameDay) + '天黑夜');
                 writeDaySummary();
+                recordTrend();
                 gamePhase = '夜晚';
                 voteRunoffMode = false; voteRunoffTargets = []; saveVotes();
                 saveGameTime();
@@ -1166,7 +1344,7 @@
                 vampParticipants = new Set();
                 vampireSuicideUsed = false;
                 hunterPending = false;
-                hunterBlockedReason = '';
+                hunterShotTaken = false;
                 sheriffTransferPending = false;
                 pendingSheriffTransferFrom = -1;
                 sheriffTransfers = [];
@@ -1195,9 +1373,10 @@
                 const idx = parseInt(hunterTargetSelect.value, 10); if (isNaN(idx) || idx < 0) return;
                 hunterModal.classList.add('hidden');
                 hunterPending = false;
-                hunterBlockedReason = '';
+                hunterShotTaken = true;
                 pushUndo('猎人开枪击杀 ' + playerLabel(idx));
                 markDead(idx, REASON_HUNTER);
+                endPendingFlow();
                 finishDeathResolution();
             }
             function showSheriffTransferModal() {
@@ -1216,10 +1395,14 @@
                     sheriffTransferPending = false;
                 }
                 renderVoteList(); renderConsole();
+                endPendingFlow();
+                checkPendingActionModal();
             }
             function sheriffTransferCancelShot() {
                 sheriffTransferModal.classList.add('hidden');
                 // 保持 pending 状态，稍后可再执行
+                endPendingFlow();
+                checkPendingActionModal();
             }
 
             function toggleBewitch(i) { if (bewitchedSet.has(i)) bewitchedSet.delete(i); else bewitchedSet.add(i); }
@@ -1383,7 +1566,7 @@
                 saveNightActions(); renderConsole();
             }
 
-            function coupleSelectOptions(selected, exclude) { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 未选择 —</option>'; for (let i = 0; i < 15; i++) { if (i === exclude) continue; const nm = names[i] ? `（${names[i]}）` : ''; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } return opts; }
+            function coupleSelectOptions(selected, exclude) { const names = parsePlayerNames(playerNamesInput.value); let opts = '<option value="">— 未选择 —</option>'; for (let i = 0; i < 15; i++) { if (i === exclude) continue; const nm = names[i] ? `（${escapeLogHtml(names[i])}）` : ''; opts += `<option value="${i}"${selected === i ? ' selected' : ''}>${i + 1}号${nm}</option>`; } return opts; }
             function dayOptions(selected) { let opts = ''; for (let d = 1; d <= MAX_DAY; d++) opts += `<option value="${d}"${selected === d ? ' selected' : ''}>第${chineseDay(d)}天</option>`; return opts; }
 
             // ---------- 控制台区块折叠（状态持久化） ----------
@@ -1456,6 +1639,7 @@
                 if (elderIdx >= 0 && !isDead(elderIdx) && elderLives < 2) html += `<div class="notice-banner">👴 长老（${playerLabel(elderIdx)}）剩余生命：<b>${elderLives}</b> 条${elderLives === 1 ? '（被吸血鬼击杀一次，或曾被解药救活 —— 仅剩 1 条）' : ''}</div>`;
                 if (godsDisabled) { html += '<div class="notice-banner warn">⚠️ 长老因「女巫毒杀 / 猎人猎杀 / 投票处决」死亡，所有神职（女巫、预言家、猎人、守护者、丘比特）技能永久失效 —— 即使撤销长老的死亡也不会恢复</div>'; html += '<div class="action-select-row"><button class="restore-gods-btn">✨ 手动恢复神职能力</button></div>'; }
                 html += renderStatsHtml();
+                html += trendPanelHtml();
                 html += '</div>';
 
                 html += victoryPanelHtml();
@@ -1483,7 +1667,7 @@
                 html += '<div class="console-block"><div class="console-block-title">💀 死亡标记</div>';
                 html += '<div class="death-grid">';
                 for (let i = 0; i < 15; i++) {
-                    const role = currentRoles ? currentRoles[i] : '—'; const nm = names[i] || '—'; const dead = isDead(i); const reason = dead ? deathReason(i) : ''; const bw = bewitchedSet.has(i); const cp = (i === coupleA || i === coupleB);
+                    const role = currentRoles ? currentRoles[i] : '—'; const nm = escapeLogHtml(names[i] || '—'); const dead = isDead(i); const reason = dead ? deathReason(i) : ''; const bw = bewitchedSet.has(i); const cp = (i === coupleA || i === coupleB);
                     html += `<div class="death-cell${dead ? ' dead' : ''}"><div class="d-no">${i + 1}号</div><div class="d-name">${nm}${bw ? ' 🎶' : ''}${cp ? ' 💘' : ''}</div><div class="d-role">${role}</div><div class="d-tags">${dead ? `💀 ${reason}` : '✅ 存活'}</div></div>`;
                 }
                 html += '</div>';
@@ -1492,8 +1676,12 @@
                 html += '<div class="action-select-row"><select class="revive-select">' + reviveOpts + '</select><button class="revive-btn"' + (deadSet.size ? '' : ' disabled') + '>↩️ 撤销死亡</button><button class="reset-death-btn"' + (deadSet.size ? '' : ' disabled') + '>🔄 重置所有死亡</button></div>';
                 html += '<div class="action-limit">↩️ 撤销死亡不再自动回满长老生命：被吸血鬼击杀后救活的长老只有 1 条命；因毒杀 / 猎杀 / 投票处决死亡的长老，神职能力已永久失效（需修正时请用上方「✨ 手动恢复神职能力」）。</div>';
                 if (sheriffTransferPending) html += '<div class="action-select-row"><button class="manual-sheriff-btn">👑 警长未移交（点击移交）</button></div>';
-                if (hunterPending) html += '<div class="action-select-row"><button class="manual-hunter-btn">🔫 猎人未开枪（点击开枪）</button></div>';
-                else if (hunterBlockedReason) html += `<div class="action-limit">🔫 猎人已死亡但不能开枪：${hunterBlockedReason}。</div>`;
+                const hunterIdx = findRoleIndex('猎人');
+                if (hunterIdx >= 0 && isDead(hunterIdx)) {
+                    const blockedNow = hunterBlockedReasonNow();
+                    if (hunterCanShoot()) html += '<div class="action-select-row"><button class="manual-hunter-btn">🔫 猎人未开枪（点击开枪）</button></div>';
+                    else if (blockedNow) html += `<div class="action-limit">🔫 猎人已死亡但不能开枪：${blockedNow}。</div>`;
+                }
                 html += '</div>';
 
                 // 吹笛人
@@ -1624,14 +1812,23 @@
                     const siblings = Array.from(consolePanel.querySelectorAll('.' + cls));
                     keepFocus = { cls: cls, idx: siblings.indexOf(active), val: active.value };
                 }
-                consolePanel.innerHTML = html;
-                applyConsoleFolding();
-                if (keepFocus && keepFocus.cls) {
-                    const el = consolePanel.querySelectorAll('.' + keepFocus.cls)[keepFocus.idx];
-                    if (el) { el.value = keepFocus.val; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+                // 只有内容真的变了才重建 DOM：避免每次输入都把整块控制台推倒重来
+                if (consolePanel.__lastHtml !== html) {
+                    consolePanel.__lastHtml = html;
+                    renderConsoleCount++;
+                    consolePanel.innerHTML = html;
+                    applyConsoleFolding();
+                    if (keepFocus && keepFocus.cls) {
+                        const el = consolePanel.querySelectorAll('.' + keepFocus.cls)[keepFocus.idx];
+                        if (el) { el.value = keepFocus.val; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
+                    }
                 }
                 syncCounterDice();
-                window.scrollTo(0, keepScroll);
+                // 不再强制 window.scrollTo（会打断手机惯性滚动），
+                // 改为在下一帧恢复滚动位置，并保留输入焦点。
+                if (typeof requestAnimationFrame === 'function') {
+                    requestAnimationFrame(function() { window.scrollTo(0, keepScroll); });
+                }
             }
 
             function renderPlayerConsole() {
@@ -1643,7 +1840,7 @@
                     '</div>';
                 html += '<div class="death-grid">';
                 for (let i = 0; i < 15; i++) {
-                    const nm = names[i] || '—';
+                    const nm = escapeLogHtml(names[i] || '—');
                     const pd = publicDeaths[i];
                     html += `<div class="death-cell${pd ? ' dead' : ''}">` +
                         `<div class="d-no">${i + 1}号</div><div class="d-name">${nm}</div>`;
@@ -1717,11 +1914,11 @@
             suicideConfirmNo.addEventListener('click', function() { suicideConfirmModal.classList.add('hidden'); pendingSuicideIndex = -1; });
             suicideConfirmModal.addEventListener('click', function(e) { if (e.target === suicideConfirmModal) { suicideConfirmModal.classList.add('hidden'); pendingSuicideIndex = -1; } });
             hunterConfirm.addEventListener('click', hunterConfirmShot);
-            hunterCancel.addEventListener('click', function() { hunterModal.classList.add('hidden'); });
-            hunterModal.addEventListener('click', function(e) { if (e.target === hunterModal) hunterModal.classList.add('hidden'); });
+            hunterCancel.addEventListener('click', function() { hunterModal.classList.add('hidden'); endPendingFlow(); checkPendingActionModal(); });
+            hunterModal.addEventListener('click', function(e) { if (e.target === hunterModal) { hunterModal.classList.add('hidden'); endPendingFlow(); checkPendingActionModal(); } });
             sheriffTransferConfirm.addEventListener('click', sheriffTransferConfirmShot);
             sheriffTransferCancel.addEventListener('click', sheriffTransferCancelShot);
-            sheriffTransferModal.addEventListener('click', function(e) { if (e.target === sheriffTransferModal) sheriffTransferModal.classList.add('hidden'); });
+            sheriffTransferModal.addEventListener('click', function(e) { if (e.target === sheriffTransferModal) { sheriffTransferModal.classList.add('hidden'); endPendingFlow(); checkPendingActionModal(); } });
             advanceNightYes.addEventListener('click', advanceNightToDay);
             advanceNightNo.addEventListener('click', function() { advanceNightModal.classList.add('hidden'); });
             advanceNightModal.addEventListener('click', function(e) { if (e.target === advanceNightModal) advanceNightModal.classList.add('hidden'); });
@@ -1793,7 +1990,7 @@
                 lines.push('—— 身份分配 ——');
                 for (let i = 0; i < 15; i++) {
                     const role = currentRoles ? currentRoles[i] : '未分配';
-                    const nm = names[i] ? `（${names[i]}）` : '';
+                    const nm = names[i] ? `（${escapeLogHtml(names[i])}）` : '';
                     const tags = [];
                     if (i === voteSheriff) tags.push('👑警长');
                     if (i === coupleA || i === coupleB) tags.push('💘情侣');
@@ -2082,37 +2279,132 @@
                 }
                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-
-            // ================= 撤销上一步 / 自动备份 =================
-            const SNAPSHOT_KEYS = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VAMP_SUICIDE_USED_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
+            // ================= 撤销上一步：命令栈（反向操作） =================
+            // 与“整份快照”不同，这里只记录一条命令真正改动到的键（反向补丁），
+            // 因此卡组更小、可撤销步数更多；同时保留 baseline，用于在存储异常时兜底。
+            const STATE_KEYS = [ASSIGN_SAVE_KEY, DEAD_KEY, DEATH_REASONS_KEY, DEATH_TIMES_KEY, COUPLE_KEY, ELDER_KEY, SPELL_KEY, NIGHT_ACTIONS_KEY, SHERIFF_TRANSFERS_KEY, VAMP_SUICIDE_USED_KEY, VOTE_KEY, VILLAGE_LOG_KEY, GAME_TIME_KEY];
             const UNDO_STACK_KEY = 'village_undo_stack';
-            const UNDO_LIMIT = 12;
+            const UNDO_LIMIT = 30;
             const undoBtn = document.getElementById('undoBtn');
             const undoHint = document.getElementById('undoHint');
-            function loadUndoStack() { try { const a = JSON.parse(localStorage.getItem(UNDO_STACK_KEY)); if (Array.isArray(a)) return a; } catch (e) {} return []; }
-            function saveUndoStack(s) {
-                // 存储空间不足时逐条丢弃最老的备份，保证最近的备份一定写得进去
+            let pendingCmd = null;
+            let renderConsoleCount = 0;
+
+            function captureAllState() {
+                const keys = {};
+                for (const k of STATE_KEYS) {
+                    const v = localStorage.getItem(k);
+                    if (v !== null && v !== undefined) keys[k] = v;
+                }
+                return keys;
+            }
+            function restoreAllState(keys) {
+                keys = keys || {};
+                for (const k of STATE_KEYS) {
+                    const v = keys[k];
+                    if (v === null || v === undefined) localStorage.removeItem(k);
+                    else localStorage.setItem(k, v);
+                }
+            }
+            function stateDelta(before, after) {
+                const mk = {}, rk = {};
+                for (const k of STATE_KEYS) {
+                    const b = before[k], a = after[k];
+                    if (b === a) continue;
+                    const hasB = b !== undefined && b !== null;
+                    const hasA = a !== undefined && a !== null;
+                    if (!hasA && hasB) rk[k] = b;
+                    else if (hasA && !hasB) mk[k] = a;
+                    else { mk[k] = a; rk[k] = b; }
+                }
+                return { mk: mk, rk: rk };
+            }
+            function buildPatch(delta, forward) {
+                const mk = forward ? delta.mk : delta.rk;
+                const rk = forward ? delta.rk : delta.mk;
+                const keys = {};
+                for (const k in mk) keys[k] = mk[k];
+                return { keys: keys, remove: Object.keys(rk) };
+            }
+            function applyPatch(patch) {
+                const keys = (patch && patch.keys) || {};
+                const remove = (patch && patch.remove) || [];
+                for (const k in keys) localStorage.setItem(k, keys[k]);
+                for (let i = 0; i < remove.length; i++) {
+                    if (keys[remove[i]] === undefined) localStorage.removeItem(remove[i]);
+                }
+            }
+            function loadCmdStack() {
+                try { const a = JSON.parse(localStorage.getItem(UNDO_STACK_KEY)); if (Array.isArray(a)) return a; } catch (e) {}
+                return [];
+            }
+            function saveCmdStack(s) {
                 const stack = s.slice();
                 while (stack.length) {
                     try { localStorage.setItem(UNDO_STACK_KEY, JSON.stringify(stack)); return; } catch (e) { stack.shift(); }
                 }
                 try { localStorage.removeItem(UNDO_STACK_KEY); } catch (e) {}
             }
-            function captureHostState() { const o = {}; for (const k of SNAPSHOT_KEYS) o[k] = localStorage.getItem(k); return o; }
+            function serializeAllState() { return captureAllState(); }
+            function applyState(keys) { restoreAllState(keys); }
             function pushUndo(label) {
-                const stack = loadUndoStack();
-                stack.push({ label: label, at: Date.now(), stamp: getGameTimeStamp(), data: captureHostState() });
+                pendingCmd = { label: label || '未命名操作', at: Date.now(), stamp: getGameTimeStamp(), base: captureAllState() };
+                return pendingCmd;
+            }
+            function commitUndo() {
+                if (!pendingCmd) return;
+                const snap = pendingCmd;
+                pendingCmd = null;
+                const after = captureAllState();
+                const delta = stateDelta(snap.base, after);
+                if (!Object.keys(delta.mk).length && !Object.keys(delta.rk).length) { updateUndoHint(); return; }
+                const stack = loadCmdStack();
+                stack.push({
+                    id: makeLogId(),
+                    label: snap.label,
+                    at: snap.at,
+                    stamp: snap.stamp,
+                    undo: buildPatch(delta, false),
+                    redo: buildPatch(delta, true),
+                    base: snap.base
+                });
                 while (stack.length > UNDO_LIMIT) stack.shift();
-                saveUndoStack(stack);
+                saveCmdStack(stack);
                 updateUndoHint();
             }
+            function runCmd(label, fn) {
+                pushUndo(label);
+                let out;
+                try { out = fn(); } finally { commitUndo(); }
+                return out;
+            }
             function updateUndoHint() {
-                const stack = loadUndoStack();
+                const stack = loadCmdStack();
                 if (undoBtn) undoBtn.disabled = stack.length === 0;
                 if (undoHint) {
-                    if (!stack.length) undoHint.textContent = '暂无可撤销的操作（关键操作会自动备份，最多保留 ' + UNDO_LIMIT + ' 步）';
-                    else { const top = stack[stack.length - 1]; undoHint.textContent = `↩️ 可撤销 ${stack.length} 步 · 最近备份：${top.label}（${top.stamp}）`; }
+                    if (!stack.length) undoHint.textContent = '暂无可撤销的操作（关键操作会记录反向补丁，最多保留 ' + UNDO_LIMIT + ' 步）';
+                    else { const top = stack[stack.length - 1]; undoHint.textContent = `↩️ 可撤销 ${stack.length} 步 · 最近一步：${top.label}（${top.stamp}）`; }
                 }
+            }
+            // 结束一条命令：生成反向补丁，并刷新界面
+            function endCmd() {
+                commitUndo();
+                refreshGameViews();
+            }
+            // 标记：处于“从存储重建界面”的过程中，避免任何写操作把状态又写回去
+            function markQuiet(fn) {
+                stateQuiet = true;
+                try { return fn(); } finally { stateQuiet = false; }
+            }
+            function silentRefresh() {
+                markQuiet(function() {
+                    renderAssignment();
+                    renderVoteList();
+                    renderConsole();
+                    renderPlayerConsole();
+                    updatePhaseButtons();
+                    syncCounterDice();
+                });
             }
             function reloadAllState() {
                 loadDeadState();
@@ -2123,7 +2415,7 @@
                 piperPending = [];
                 vampParticipants = new Set();
                 vampPendingTarget = -1;
-                hunterPending = false; hunterBlockedReason = '';
+                hunterPending = false; hunterShotTaken = false;
                 sheriffTransferPending = false; pendingSheriffTransferFrom = -1;
                 sheriffTransfers = loadSheriffTransfers();
                 vampireSuicideUsed = loadVampireSuicideUsed();
@@ -2136,27 +2428,103 @@
                 const saved = loadSavedAssignment();
                 if (saved) { currentRoles = [...saved.roles]; playerNamesInput.value = (saved.names || []).join(' '); setLocked(true); }
                 renderVillageLogs();
-                refreshGameViews();
+                // 注意：这里只做“从存储重建内存”，不调用 refreshGameViews，
+                // 否则撤销/导入会再次触发状态写入，形成递归。
+                silentRefresh();
             }
+            // 撤销：用反向补丁回滚；若补丁键与当前状态对不上（如手工编辑过存档），退回 baseline 整份恢复
             function undoLast() {
-                const stack = loadUndoStack();
+                const stack = loadCmdStack();
                 if (!stack.length) { showToast('没有可撤销的操作'); return; }
-                const snap = stack.pop();
-                for (const k of SNAPSHOT_KEYS) {
-                    const val = snap.data ? snap.data[k] : null;
-                    if (val === null || val === undefined) localStorage.removeItem(k);
-                    else localStorage.setItem(k, val);
+                const cmd = stack[stack.length - 1];
+                const cur = captureAllState();
+                let mismatch = false;
+                if (cmd.redo && cmd.redo.keys) {
+                    for (const k in cmd.redo.keys) if (cmd.redo.keys[k] !== cur[k]) { mismatch = true; break; }
                 }
-                saveUndoStack(stack);
+                if (mismatch) restoreAllState(cmd.base || {});
+                else applyPatch(cmd.undo);
+                stack.pop();
+                saveCmdStack(stack);
                 reloadAllState();
-                appendAutoLog(`↩️ 撤销上一步：${snap.label}（已回到 ${snap.stamp} 的状态）`);
+                appendAutoLog(`↩️ 撤销上一步：${cmd.label}（已回到 ${cmd.stamp} 的状态）`);
                 updateUndoHint();
-                showToast(`已撤销：${snap.label}`);
+                showToast(`已撤销：${cmd.label}`);
             }
             if (undoBtn) undoBtn.addEventListener('click', function() {
                 askConfirm('↩️ 确定撤销上一步吗？<br>将回滚<b>主持人板块</b>的状态（身份、死亡、夜晚行动、投票、日志、游戏时间）；玩家板块的录入不受影响。', undoLast);
             });
 
+            // ================= 备份 / 恢复（JSON） =================
+            const BACKUP_VERSION = 1;
+            const BACKUP_META_KEY = 'village_backup_meta';
+            const backupBtn = document.getElementById('backupBtn');
+            const backupModal = document.getElementById('backupModal');
+            const backupExport = document.getElementById('backupExport');
+            const backupHint = document.getElementById('backupHint');
+            const backupDownload = document.getElementById('backupDownload');
+            const backupCopy = document.getElementById('backupCopy');
+            const backupClose = document.getElementById('backupClose');
+            const backupFile = document.getElementById('backupFile');
+            function buildBackupPayload() {
+                return {
+                    app: '鬼村神秘小工具 4.0',
+                    version: BACKUP_VERSION,
+                    exportedAt: new Date().toISOString(),
+                    gameDay: gameDay,
+                    gamePhase: gamePhase,
+                    playerCount: 15,
+                    keys: captureAllState()
+                };
+            }
+            function applyBackup(payload) {
+                if (!payload || typeof payload !== 'object' || !payload.keys || typeof payload.keys !== 'object') return false;
+                restoreAllState(payload.keys);
+                reloadAllState();
+                appendAutoLog(`💾 已导入备份（导出于 ${payload.exportedAt || '未知时间'}）`);
+                updateUndoHint();
+                return true;
+            }
+            function openBackupModal() {
+                backupExport.value = JSON.stringify(buildBackupPayload(), null, 1);
+                backupHint.textContent = '备份内容已生成，可下载或复制保存。';
+                backupModal.classList.remove('hidden');
+            }
+            function downloadBackup() {
+                const text = backupExport.value || JSON.stringify(buildBackupPayload(), null, 1);
+                const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `鬼村备份_第${gameDay}天${gamePhase}_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+            }
+            function copyBackup() {
+                const text = backupExport.value;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function() { backupHint.textContent = '📋 已复制到剪贴板。'; }, function() { backupExport.removeAttribute('readonly'); backupExport.select(); });
+                } else { backupExport.removeAttribute('readonly'); backupExport.select(); }
+            }
+            function importBackupFile(file) {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function() {
+                    let ok = false;
+                    try { ok = applyBackup(JSON.parse(String(reader.result))); } catch (e) { ok = false; }
+                    backupHint.textContent = ok ? '✅ 已导入并重建本局状态。' : '❌ 导入失败：文件不是本工具导出的 JSON 备份。';
+                    if (ok) backupExport.value = JSON.stringify(buildBackupPayload(), null, 1);
+                };
+                reader.readAsText(file, 'utf-8');
+            }
+            if (backupBtn) backupBtn.addEventListener('click', openBackupModal);
+            if (backupClose) backupClose.addEventListener('click', function() { backupModal.classList.add('hidden'); });
+            if (backupModal) backupModal.addEventListener('click', function(e) { if (e.target === backupModal) backupModal.classList.add('hidden'); });
+            if (backupDownload) backupDownload.addEventListener('click', downloadBackup);
+            if (backupCopy) backupCopy.addEventListener('click', copyBackup);
+            if (backupFile) backupFile.addEventListener('change', function() { importBackupFile(backupFile.files && backupFile.files[0]); backupFile.value = ''; });
             // ================= 通用确认框 =================
             const actionConfirmModal = document.getElementById('actionConfirmModal');
             const actionConfirmText = document.getElementById('actionConfirmText');
@@ -2164,6 +2532,7 @@
             const actionConfirmNo = document.getElementById('actionConfirmNo');
             let pendingConfirmAction = null;
             function askConfirm(html, onYes) {
+                if (document.activeElement && document.activeElement.focus) actionConfirmModal.__returnFocus = document.activeElement;
                 pendingConfirmAction = onYes;
                 actionConfirmText.innerHTML = html;
                 actionConfirmModal.classList.remove('hidden');
@@ -2179,19 +2548,69 @@
             // ================= 骰子历史 =================
             const DICE_HISTORY_LIMIT = 12;
             let diceHistory = [];
+            function makeDiceId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
             function renderDiceHistory() {
                 const box = document.getElementById('diceHistory');
                 if (!box) return;
-                if (!diceHistory.length) { box.innerHTML = ''; return; }
-                box.innerHTML = diceHistory.slice().reverse().map(function(h) { return `<div>${h.t} · ${h.text}</div>`; }).join('');
+                if (!diceHistory.length) { box.innerHTML = '<div class="log-empty">暂无掷骰记录</div>'; return; }
+                const rows = diceHistory.slice().reverse().map(function(h, i) {
+                    return `<div class="dice-history-row${i === 0 ? ' is-latest' : ''}">` +
+                        `<span class="dice-history-time">${escapeLogHtml(h.t)}</span>` +
+                        `<span class="dice-history-text">${escapeLogHtml(h.text)}</span>` +
+                        `<button class="dice-history-del" data-dice-del="${h.id}" title="删除这条记录" aria-label="删除这条掷骰记录">✕</button>` +
+                        `</div>`;
+                }).join('');
+                const actions = '<div class="dice-history-actions">' +
+                    `<button class="dice-history-undo" data-dice-act="undo"${diceHistory.length ? '' : ' disabled'}>↩️ 撤回最近一条</button>` +
+                    `<button class="dice-history-undo" data-dice-act="clear"${diceHistory.length ? '' : ' disabled'}>🗑️ 清空掷骰记录</button>` +
+                    '</div>';
+                box.innerHTML = rows + actions;
             }
             function pushDiceHistory() {
                 const txt = (diceResultDiv.innerText || '').replace(/\s+/g, ' ').trim();
                 if (!txt || txt === '—') return;
-                diceHistory.push({ t: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }), text: txt });
+                diceHistory.push({ id: makeDiceId(), t: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }), text: txt });
                 if (diceHistory.length > DICE_HISTORY_LIMIT) diceHistory.shift();
                 renderDiceHistory();
             }
+            function deleteDiceHistory(id) {
+                const before = diceHistory.length;
+                diceHistory = diceHistory.filter(function(h) { return h.id !== id; });
+                if (diceHistory.length === before) return;
+                renderDiceHistory();
+                if (!diceHistory.length) diceResultDiv.textContent = '—';
+                showToast('已删除该条掷骰记录');
+            }
+            function undoLatestDiceHistory() {
+                if (!diceHistory.length) { showToast('暂无掷骰记录'); return; }
+                const removed = diceHistory.pop();
+                renderDiceHistory();
+                const rest = diceHistory[diceHistory.length - 1];
+                diceResultDiv.textContent = rest ? rest.text : '—';
+                showToast('已撤回：' + removed.text);
+            }
+            function clearDiceHistory() {
+                if (!diceHistory.length) { showToast('暂无掷骰记录'); return; }
+                askConfirm('🗑️ 确定清空全部掷骰记录吗？<br>（只影响骰子历史，对局数据不受影响）', function() {
+                    diceHistory = [];
+                    renderDiceHistory();
+                    diceResultDiv.textContent = '—';
+                    showToast('已清空掷骰记录');
+                });
+            }
+            (function initDiceHistoryEvents() {
+                const box = document.getElementById('diceHistory');
+                if (!box) return;
+                box.addEventListener('click', function(e) {
+                    const delBtn = e.target.closest('[data-dice-del]');
+                    if (delBtn) { deleteDiceHistory(delBtn.getAttribute('data-dice-del')); return; }
+                    const actBtn = e.target.closest('[data-dice-act]');
+                    if (!actBtn) return;
+                    if (actBtn.getAttribute('data-dice-act') === 'undo') undoLatestDiceHistory();
+                    else clearDiceHistory();
+                });
+            })();
+
 
             // ================= 一键重置本夜 / 目标搜索 / 快捷键 =================
             function resetNightActions() {
@@ -2226,9 +2645,15 @@
                 else showToast('该玩家不在当前可选范围内');
             });
             document.addEventListener('keydown', function(e) {
+                // 快捷键：Ctrl/Cmd + Z 撤销；Esc 关闭当前弹窗
+                if ((e.ctrlKey || e.metaKey) && String(e.key).toLowerCase() === 'z') {
+                    if (!e.repeat) { e.preventDefault(); undoLast(); }
+                    return;
+                }
                 if (e.key !== 'Escape') return;
                 const open = document.querySelector('.modal-overlay:not(.hidden)');
                 if (open) {
+                    const returnTo = open.__returnFocus || null;
                     open.classList.add('hidden');
                     pendingConfirmAction = null;
                     pendingElderReviveIndex = -1;
@@ -2237,6 +2662,126 @@
                 }
             });
             updateUndoHint();
+
+
+            // ---------- 趋势按钮 / 移动端快捷条 ----------
+            function quickAction(name) {
+                if (name === 'undo') { undoLast(); return; }
+                if (name === 'reset-night') { resetNightActions(); return; }
+                if (name === 'advance') {
+                    if (gamePhase === '夜晚') showAdvanceNightModal();
+                    else showAdvanceDayModal();
+                    return;
+                }
+                if (name === 'settle') { openSettleModal(); return; }
+            }
+            const compactBar = document.querySelector('.compact-bar');
+            if (compactBar) compactBar.addEventListener('click', function(e) {
+                const btn = e.target.closest('[data-quick]');
+                if (!btn) return;
+                quickAction(btn.getAttribute('data-quick'));
+            });
+            consolePanel.addEventListener('click', function(e) {
+                if (e.target.closest('.trend-record-btn')) { recordTrend(); renderConsole(); showToast('\\u5df2\\u8bb0\\u4e0b\\u5f53\\u524d\\u5b58\\u6d3b\\u72b6\\u6001'); return; }
+                if (e.target.closest('.trend-clear-btn')) clearTrend();
+            });
+
+            // ---------- 弹窗焦点：Tab 循环留在弹窗内，Esc 归位 ----------
+            function focusablesIn(root) {
+                return Array.from(root.querySelectorAll('button, select, textarea, input, [tabindex]'))
+                    .filter(function(el) { return !el.disabled && !el.hidden; });
+            }
+            document.addEventListener('keydown', function(e) {
+                const open = document.querySelector('.modal-overlay:not(.hidden)');
+                if (!open) return;
+                if (e.key === 'Tab') {
+                    const items = focusablesIn(open);
+                    if (!items.length) return;
+                    const first = items[0], last = items[items.length - 1];
+                    const active = document.activeElement;
+                    if (e.shiftKey && (active === first || !open.contains(active))) { e.preventDefault(); last.focus(); }
+                    else if (!e.shiftKey && (active === last || !open.contains(active))) { e.preventDefault(); first.focus(); }
+                    return;
+                }
+                if (e.key === 'Escape') {
+                    const back = open.__returnFocus;
+                    setTimeout(function() { if (back && back.focus) { try { back.focus(); } catch (err) {} } }, 0);
+                }
+            });
+
+            // ================= 复盘可视化：存活趋势 / 吹笛进度 =================
+            const TREND_KEY = 'village_trend';
+            const TREND_LIMIT = 20;
+            function loadTrend() {
+                try { const a = JSON.parse(localStorage.getItem(TREND_KEY)); if (Array.isArray(a)) return a; } catch (e) {}
+                return [];
+            }
+            function saveTrend(list) {
+                try { localStorage.setItem(TREND_KEY, JSON.stringify(list.slice(-TREND_LIMIT))); } catch (e) {}
+            }
+            function recordTrend() {
+                if (!currentRoles) return;
+                const v = victoryStatus();
+                const label = getGameTimeStamp();
+                const list = loadTrend();
+                const last = list[list.length - 1];
+                if (last && last.label === label) list.pop();
+                list.push({
+                    label: label,
+                    villager: v.counts.villager,
+                    god: v.counts.god,
+                    vampire: v.counts.vampire,
+                    other: v.counts.cupid + v.counts.neutral,
+                    piperDone: v.piperDone,
+                    piperTotal: v.piperTotal,
+                    alive: v.alive.length
+                });
+                saveTrend(list);
+            }
+            function trendPanelHtml() {
+                const list = loadTrend();
+                if (!list.length) {
+                    return '<div class="trend-box"><div class="trend-title">\ud83d\udcc8 \u5b58\u6d3b\u8d8b\u52bf\uff08\u590d\u76d8\u7528\uff09</div><div class="action-limit">\u8fd8\u6ca1\u6709\u8bb0\u5f55\u3002\u63a8\u8fdb\u5230\u591c\u665a\u65f6\u4f1a\u81ea\u52a8\u8bb0\u4e0b\u5f53\u65e5\u5b58\u6d3b\u6784\u6210\uff0c\u4e5f\u53ef\u624b\u52a8\u8bb0\u5f55\u3002</div></div>';
+                }
+                let rows = '';
+                for (let i = 0; i < list.length; i++) {
+                    const t = list[i];
+                    const total = Math.max(1, t.alive);
+                    const pct = function(n) { return Math.round(n / total * 100); };
+                    rows += '<div class="trend-row">' +
+                        '<span class="trend-label">' + escapeLogHtml(t.label) + '</span>' +
+                        '<span class="trend-bar">' +
+                        '<i class="trend-seg seg-villager" style="width:' + pct(t.villager) + '%" title="\u666e\u901a\u6751\u6c11 ' + t.villager + '"></i>' +
+                        '<i class="trend-seg seg-god" style="width:' + pct(t.god) + '%" title="\u795e\u804c ' + t.god + '"></i>' +
+                        '<i class="trend-seg seg-vampire" style="width:' + pct(t.vampire) + '%" title="\u5438\u8840\u9b3c ' + t.vampire + '"></i>' +
+                        '<i class="trend-seg seg-other" style="width:' + pct(t.other) + '%" title="\u4e2d\u7acb/\u4e18\u6bd4\u7279 ' + t.other + '"></i>' +
+                        '</span>' +
+                        '<span class="trend-num">\u5b58\u6d3b ' + t.alive + '</span>' +
+                        '</div>';
+                }
+                const last = list[list.length - 1];
+                const piperPct = last.piperTotal > 0 ? Math.round(last.piperDone / last.piperTotal * 100) : 0;
+                return '<div class="trend-box">' +
+                    '<div class="trend-title">\ud83d\udcc8 \u5b58\u6d3b\u8d8b\u52bf\uff08\u590d\u76d8\u7528\uff09\u00b7 \u6700\u8fd1 ' + list.length + ' \u4e2a\u9636\u6bb5</div>' +
+                    '<div class="trend-legend"><span class="lg seg-villager"></span>\u6751\u6c11' +
+                    '<span class="lg seg-god"></span>\u795e\u804c' +
+                    '<span class="lg seg-vampire"></span>\u5438\u8840\u9b3c' +
+                    '<span class="lg seg-other"></span>\u4e2d\u7acb/\u4e18\u6bd4\u7279</div>' +
+                    rows +
+                    '<div class="trend-row"><span class="trend-label">\ud83c\udfb6 \u5439\u7b1b\u8fdb\u5ea6</span>' +
+                    '<span class="trend-bar"><i class="trend-seg seg-piper" style="width:' + piperPct + '%"></i></span>' +
+                    '<span class="trend-num">' + last.piperDone + ' / ' + last.piperTotal + '</span></div>' +
+                    '<div class="action-select-row"><button class="trend-record-btn">\ud83d\udcdd \u8bb0\u4e0b\u5f53\u524d\u72b6\u6001</button>' +
+                    '<button class="trend-clear-btn">\ud83d\uddd1\ufe0f \u6e05\u7a7a\u8d8b\u52bf</button></div>' +
+                    '</div>';
+            }
+            function clearTrend() {
+                askConfirm('\ud83d\uddd1\ufe0f \u786e\u5b9a\u6e05\u7a7a\u5b58\u6d3b\u8d8b\u52bf\u8bb0\u5f55\u5417\uff1f', function() {
+                    saveTrend([]);
+                    renderConsole();
+                    showToast('\u5df2\u6e05\u7a7a\u5b58\u6d3b\u8d8b\u52bf');
+                });
+            }
 
             // ================= 统一刷新 =================
             function refreshGameViews() { renderAssignment(); renderVoteList(); renderConsole(); renderPlayerConsole(); updatePhaseButtons(); syncCounterDice(); }
@@ -2250,6 +2795,8 @@
             const nowYear = new Date().getFullYear();
             document.getElementById('yearText').textContent = nowYear > startYear ? `${startYear}-${nowYear}` : String(startYear);
         })();
+    
+
     </script>
 </body>
 </html>
